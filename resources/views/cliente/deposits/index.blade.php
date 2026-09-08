@@ -19,6 +19,19 @@
         </div>
     </div>
 
+    <!-- Aviso de Tiempo de Acreditación (10 Minutos) -->
+    <div class="p-4 rounded-3xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs shadow-lg flex items-start gap-3">
+        <span class="text-2xl shrink-0">⏳</span>
+        <div class="space-y-1">
+            <div class="font-extrabold text-white text-xs sm:text-sm">
+                Tiempo estimado de acreditación: ~10 Minutos
+            </div>
+            <p class="text-[11px] text-cyan-200/90 leading-relaxed">
+                Una vez realices la transferencia y subas tu comprobante, nuestro sistema y equipo administrativo validarán tu pago. <strong>Por favor espera aproximadamente 10 minutos</strong> para que tu saldo se refleje automáticamente en tu cuenta.
+            </p>
+        </div>
+    </div>
+
     <!-- Cuentas Oficiales para Transferir y Escanear QR -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         @forelse($paymentMethods as $pm)

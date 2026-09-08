@@ -59,6 +59,6 @@ class ClientDepositController extends Controller
         ]);
 
         return redirect()->route('cliente.deposits.index')
-            ->with('success', '¡Recarga de $' . number_format($request->amount, 0, ',', '.') . ' COP reportada con éxito! El administrador verificará tu comprobante en breve.');
+            ->with('success', '¡Recarga de $' . number_format($request->amount, 0, ',', '.') . ' COP reportada con éxito! Por favor espera aproximadamente 10 minutos mientras verificamos tu comprobante para acreditar el saldo en tu cuenta.');
     }
 }

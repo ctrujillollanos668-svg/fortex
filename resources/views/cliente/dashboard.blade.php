@@ -368,15 +368,25 @@
     <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-6 max-w-sm w-full shadow-2xl relative text-center max-h-[94vh] overflow-y-auto">
         <button onclick="closeSupportModal()" class="absolute right-4 top-4 text-slate-400 hover:text-white text-xl font-bold">✕</button>
         <span class="text-4xl block mb-2">🎧</span>
-        <h3 class="text-base font-extrabold text-white">Centro de Ayuda VIP</h3>
-        <p class="text-xs text-slate-400 mt-1 mb-4">¿Tienes dudas con tus recargas, retiros o ganancias? Contáctanos de inmediato.</p>
+        <h3 class="text-base font-extrabold text-white">Centro de Ayuda y Quejas VIP</h3>
+        <p class="text-xs text-slate-400 mt-1 mb-3">¿Tienes dudas, solicitudes o quejas con tus recargas, planes o retiros? Escríbenos.</p>
+
+        <!-- Horario de Atención Oficial -->
+        <div class="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-left mb-3">
+            <div class="flex items-center gap-1.5 font-bold text-emerald-400 text-xs mb-1">
+                <span>⏰</span> Horario de Atención y Quejas
+            </div>
+            <p class="text-[11px] text-emerald-200/90 leading-tight">
+                <strong>Lunes a Domingo:</strong> 8:00 AM a 8:00 PM (Hora Colombia). Nuestros asesores oficiales responderán tu solicitud a la brevedad.
+            </p>
+        </div>
         
-        <div class="space-y-2 text-xs">
-            <a href="https://t.me/+{{ env('SUPPORT_TELEGRAM', '573115138588') }}" target="_blank" class="w-full py-3 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 font-bold rounded-xl flex items-center justify-center gap-2 transition">
-                <span>✈️</span> Soporte Telegram (+57 311 513 8588)
+        <div class="space-y-2.5 text-xs">
+            <a href="https://api.whatsapp.com/send?phone={{ env('SUPPORT_WHATSAPP', '573115138588') }}&text={{ urlencode('Hola Soporte FORTEX 🟢, tengo una consulta/queja sobre mi cuenta.') }}" target="_blank" class="w-full py-3 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-bold rounded-xl flex items-center justify-center gap-2 transition">
+                <span>💬</span> WhatsApp Oficial (8:00 AM - 8:00 PM)
             </a>
-            <a href="https://api.whatsapp.com/send?phone={{ env('SUPPORT_WHATSAPP', '573115138588') }}&text={{ urlencode('Hola Soporte FORTEX 🟢, requiero asesoría con mi cuenta.') }}" target="_blank" class="w-full py-3 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-bold rounded-xl flex items-center justify-center gap-2 transition">
-                <span>💬</span> Asesor Oficial WhatsApp (+57 311 513 8588)
+            <a href="https://t.me/+{{ env('SUPPORT_TELEGRAM', '573115138588') }}" target="_blank" class="w-full py-3 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 font-bold rounded-xl flex items-center justify-center gap-2 transition">
+                <span>✈️</span> Telegram Soporte (8:00 AM - 8:00 PM)
             </a>
         </div>
     </div>

@@ -12,6 +12,14 @@ use Illuminate\Support\Facades\DB;
 
 class ClientWithdrawalController extends Controller
 {
+    public static function isWithdrawalWindowOpen(): bool
+    {
+        $now = now()->setTimezone('America/Bogota');
+        $hour = (int) $now->format('H');
+        // Horarios: 8:00 AM a 12:00 PM (08:00 - 11:59) y 2:00 PM a 6:00 PM (14:00 - 17:59)
+        return ($hour >= 8 && $hour < 12) || ($hour >= 14 && $hour < 18);
+    }
+
     public function index()
     {
         $user = Auth::user();
@@ -19,12 +27,18 @@ class ClientWithdrawalController extends Controller
         $paymentMethods = PaymentMethod::where('status', true)->get();
         $withdrawableBalance = $user->withdrawableBalance();
         $uninvestedDeposit = $user->uninvestedDeposit();
+        $isWithdrawalOpen = self::isWithdrawalWindowOpen();
+        $currentBogotaTime = now()->setTimezone('America/Bogota')->format('h:i A');
 
-        return view('cliente.withdrawals.index', compact('user', 'withdrawals', 'paymentMethods', 'withdrawableBalance', 'uninvestedDeposit'));
+        return view('cliente.withdrawals.index', compact('user', 'withdrawals', 'paymentMethods', 'withdrawableBalance', 'uninvestedDeposit', 'isWithdrawalOpen', 'currentBogotaTime'));
     }
 
     public function store(Request $request)
     {
+        if (!self::isWithdrawalWindowOpen()) {
+            return back()->with('error', '⚠️ Los retiros solo se procesan en los horarios oficiales: de 8:00 AM a 12:00 PM y de 2:00 PM a 6:00 PM (Hora Colombia). Por favor envía tu solicitud dentro de esas franjas.');
+        }
+
         $user = Auth::user();
         $withdrawable = $user->withdrawableBalance();
 

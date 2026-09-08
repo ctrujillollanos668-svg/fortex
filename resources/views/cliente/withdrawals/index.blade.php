@@ -22,6 +22,22 @@
         </div>
     </div>
 
+    <!-- Estado y Horarios Oficiales de Retiro -->
+    <div class="p-4 rounded-3xl border text-xs shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 {{ $isWithdrawalOpen ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : 'bg-rose-500/10 border-rose-500/30 text-rose-300' }}">
+        <div class="space-y-1">
+            <div class="flex items-center gap-2 font-black text-sm {{ $isWithdrawalOpen ? 'text-emerald-400' : 'text-rose-400' }}">
+                <span>{{ $isWithdrawalOpen ? '🟢' : '🔴' }}</span>
+                <span>{{ $isWithdrawalOpen ? 'Horario de Retiros HABILITADO' : 'Horario de Retiros CERRADO Actualmente' }}</span>
+            </div>
+            <p class="text-[11px] {{ $isWithdrawalOpen ? 'text-emerald-300/90' : 'text-rose-300/90' }}">
+                ⏰ <strong>Horario Oficial de Pagos:</strong> 8:00 AM a 12:00 PM &nbsp;|&nbsp; 2:00 PM a 6:00 PM (Hora Colombia).
+            </p>
+        </div>
+        <div class="px-3 py-1.5 rounded-xl {{ $isWithdrawalOpen ? 'bg-emerald-950/80 border border-emerald-500/30 text-emerald-300' : 'bg-rose-950/80 border border-rose-500/30 text-rose-300' }} text-[11px] font-mono font-bold shrink-0">
+            Hora actual: {{ $currentBogotaTime ?? now()->setTimezone('America/Bogota')->format('h:i A') }}
+        </div>
+    </div>
+
     @if($uninvestedDeposit > 0)
         <!-- Aviso explicativo sobre saldo de recarga vs ganancias -->
         <div class="p-4 bg-amber-500/10 border border-amber-500/30 rounded-3xl text-xs text-amber-300 space-y-1.5 shadow-lg">
@@ -108,7 +124,11 @@
             </div>
 
             <!-- Botón de Envío -->
-            @if($user->balance >= 15000)
+            @if(!$isWithdrawalOpen)
+                <button disabled type="button" class="w-full py-3.5 bg-rose-500/20 border border-rose-500/40 text-rose-300 font-bold rounded-2xl cursor-not-allowed text-xs sm:text-sm">
+                    🔒 Retiros Cerrados (Horarios: 8:00 AM - 12:00 PM | 2:00 PM - 6:00 PM)
+                </button>
+            @elseif($user->balance >= 15000)
                 <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-slate-950 font-black rounded-2xl shadow-lg shadow-cyan-500/25 transition active:scale-95 text-xs sm:text-sm cursor-pointer">
                     ⚡ Solicitar Retiro Inmediato
                 </button>
