@@ -29,6 +29,7 @@ class ClientWithdrawalController extends Controller
         $uninvestedDeposit = $user->uninvestedDeposit();
         $isWithdrawalOpen = self::isWithdrawalWindowOpen();
         $totalDeposited = $user->totalDeposited();
+        $currentBogotaTime = now()->setTimezone('America/Bogota')->format('h:i A');
 
         return view('cliente.withdrawals.index', compact('user', 'withdrawals', 'paymentMethods', 'withdrawableBalance', 'uninvestedDeposit', 'totalDeposited', 'isWithdrawalOpen', 'currentBogotaTime'));
     }
