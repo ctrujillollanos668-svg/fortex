@@ -40,36 +40,39 @@ class DatabaseSeeder extends Seeder
 
         // 3. Crear Planes de Inversión en Pesos Colombianos (COP)
         Plan::create([
-            'name' => 'VIP 1 - Bronce',
-            'description' => 'Plan inicial accesible para comenzar. Rendimiento diario durante 30 días.',
+            'name' => 'Plan Nivel 1',
+            'description' => 'Membresía inicial con 5% de ganancia diaria en pesos colombianos ($ COP).',
             'price' => 30000.00, // $30.000 COP
             'daily_percentage' => 5.00, // 5% = $1.500 COP diarios
             'duration_days' => 30,
             'max_return' => 45000.00, // $45.000 COP total
-            'badge' => 'Básico',
+            'badge' => '⭐ VIP Nivel 1',
             'status' => true,
+            'show_on_home' => true,
         ]);
 
         Plan::create([
-            'name' => 'VIP 2 - Plata',
-            'description' => 'Plan intermedio con mayor rentabilidad diaria garantizada.',
-            'price' => 50000.00, // $50.000 COP
-            'daily_percentage' => 6.00, // 6% = $3.000 COP diarios
+            'name' => 'Plan Nivel 2',
+            'description' => 'Membresía intermedia más popular con 6% de retorno diario garantizado.',
+            'price' => 60000.00, // $60.000 COP
+            'daily_percentage' => 6.00, // 6% = $3.600 COP diarios
             'duration_days' => 30,
-            'max_return' => 90000.00, // $90.000 COP total
-            'badge' => '🔥 Más Popular',
+            'max_return' => 108000.00, // $108.000 COP total
+            'badge' => '🔥 VIP Nivel 2 - Más Popular',
             'status' => true,
+            'show_on_home' => true,
         ]);
 
         Plan::create([
-            'name' => 'VIP 3 - Oro',
-            'description' => 'Plan avanzado de alta rentabilidad y soporte prioritario en Telegram.',
-            'price' => 100000.00, // $100.000 COP
-            'daily_percentage' => 7.00, // 7% = $7.000 COP diarios
+            'name' => 'Plan Nivel 3',
+            'description' => 'Membresía avanzada de alta rentabilidad con 7% diario y soporte prioritario.',
+            'price' => 120000.00, // $120.000 COP
+            'daily_percentage' => 7.00, // 7% = $8.400 COP diarios
             'duration_days' => 30,
-            'max_return' => 210000.00, // $210.000 COP total
-            'badge' => '💎 Recomendado',
+            'max_return' => 252000.00, // $252.000 COP total
+            'badge' => '💎 VIP Nivel 3 - Élite',
             'status' => true,
+            'show_on_home' => true,
         ]);
 
         // 4. Métodos de Pago Dinámicos

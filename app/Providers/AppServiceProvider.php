@@ -21,10 +21,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Auto-migración segura para entornos serverless / Wasmer / Render
+        // Auto-sincronización segura y ultrarrápida para Wasmer / Serverless
         try {
-            if (!cache()->has('system_db_sync_v3')) {
-                // 1. Columnas en users para Ruleta y Sobre Rojo
+            if (!cache()->has('system_db_sync_v6')) {
+                // 1. Columnas en tabla users
                 if (Schema::hasTable('users')) {
                     if (!Schema::hasColumn('users', 'last_spin_at')) {
                         Schema::table('users', function (Blueprint $table) {
@@ -43,24 +43,33 @@ class AppServiceProvider extends ServiceProvider
                     }
                 }
 
-                // 2. Columna stock en plans
-                if (Schema::hasTable('plans') && !Schema::hasColumn('plans', 'stock')) {
-                    Schema::table('plans', function (Blueprint $table) {
-                        $table->integer('stock')->nullable()->after('max_return');
-                    });
+                // 2. Columnas en tabla plans
+                if (Schema::hasTable('plans')) {
+                    if (!Schema::hasColumn('plans', 'stock')) {
+                        Schema::table('plans', function (Blueprint $table) {
+                            $table->integer('stock')->nullable()->after('max_return');
+                        });
+                    }
+                    if (!Schema::hasColumn('plans', 'show_on_home')) {
+                        Schema::table('plans', function (Blueprint $table) {
+                            $table->boolean('show_on_home')->default(true)->after('status');
+                        });
+                    }
                 }
 
-                // 3. Ejecución segura de migraciones pendientes
-                try {
-                    \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-                } catch (\Throwable $migEx) {
-                    // Ignorar si ya están sincronizadas
+                // 3. Columnas en tabla withdrawals
+                if (Schema::hasTable('withdrawals')) {
+                    if (!Schema::hasColumn('withdrawals', 'admin_notes')) {
+                        Schema::table('withdrawals', function (Blueprint $table) {
+                            $table->text('admin_notes')->nullable()->after('status');
+                        });
+                    }
                 }
 
-                cache()->forever('system_db_sync_v3', true);
+                cache()->forever('system_db_sync_v6', true);
             }
         } catch (\Throwable $e) {
-            // Ignorar silenciosamente si no hay conexión temporal o permisos DDL
+            // Continuar sin bloquear el request
         }
     }
 }
