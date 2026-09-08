@@ -154,9 +154,10 @@
                 <span class="text-[9px]">Mis Planes</span>
             </a>
 
-            <!-- 4. Recargar (Botón Central Destacado) -->
-            <a href="{{ route('cliente.deposits.index') }}" class="-mt-4 w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 flex items-center justify-center text-lg font-extrabold shadow-lg shadow-emerald-500/30 active:scale-95 transition shrink-0">
-                ➕
+            <!-- 4. Recargar -->
+            <a href="{{ route('cliente.deposits.index') }}" class="flex flex-col items-center gap-1 transition px-1 py-1 {{ request()->routeIs('cliente.deposits.*') ? 'text-emerald-400 scale-105 font-bold' : 'text-slate-400 hover:text-slate-200' }}">
+                <span class="text-base leading-none">💳</span>
+                <span class="text-[9px]">Recargar</span>
             </a>
 
             <!-- 5. Mi Red (10%) -->
