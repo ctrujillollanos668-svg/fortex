@@ -147,8 +147,17 @@
                                 <span class="px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 text-[10px] font-bold uppercase border border-amber-500/30">En Revisión</span>
                             @elseif($with->status === 'approved')
                                 <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[10px] font-bold uppercase border border-emerald-500/30">Pagado</span>
+                                @if($with->admin_notes)
+                                    <span class="text-[10px] text-emerald-400/80 block mt-0.5">{{ $with->admin_notes }}</span>
+                                @endif
                             @else
-                                <span class="px-2.5 py-0.5 rounded-full bg-rose-500/15 text-rose-400 text-[10px] font-bold uppercase border border-rose-500/30">Rechazado</span>
+                                <span class="px-2.5 py-0.5 rounded-full bg-rose-500/15 text-rose-400 text-[10px] font-bold uppercase border border-rose-500/30">Rechazado & Reembolsado</span>
+                                @if($with->admin_notes)
+                                    <div class="mt-1 text-left sm:text-right">
+                                        <span class="text-[10px] text-rose-300 font-medium block max-w-[240px] leading-tight">⚠️ {{ $with->admin_notes }}</span>
+                                        <span class="text-[9px] text-emerald-400 font-semibold block mt-0.5">✓ Saldo devuelto a tu cuenta</span>
+                                    </div>
+                                @endif
                             @endif
                             <span class="block text-[10px] text-slate-500 mt-1">{{ $with->created_at->format('d/m/Y H:i') }}</span>
                         </div>

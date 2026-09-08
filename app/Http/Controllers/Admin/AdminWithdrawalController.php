@@ -50,17 +50,19 @@ class AdminWithdrawalController extends Controller
             return back()->with('error', 'Esta solicitud de retiro ya fue procesada.');
         }
 
-        DB::transaction(function () use ($withdrawal, $request) {
+        $reason = $request->input('admin_notes') ?: 'Dirección de billetera o cuenta incorrecta / no válida.';
+
+        DB::transaction(function () use ($withdrawal, $reason) {
             $user = $withdrawal->user;
 
             // 1. Devolver saldo al cliente
             $user->balance += $withdrawal->amount;
             $user->save();
 
-            // 2. Marcar retiro como rechazado
+            // 2. Marcar retiro como rechazado con el motivo/explicación
             $withdrawal->update([
                 'status' => 'rejected',
-                'admin_notes' => $request->input('admin_notes', 'Dirección de billetera incorrecta o solicitud inválida.'),
+                'admin_notes' => $reason,
             ]);
 
             // 3. Registrar reembolso en historial
@@ -69,10 +71,10 @@ class AdminWithdrawalController extends Controller
                 'type' => 'withdrawal_refund',
                 'amount' => $withdrawal->amount,
                 'balance_after' => $user->balance,
-                'description' => 'Reembolso por solicitud de retiro rechazada',
+                'description' => 'Reembolso por retiro rechazado: ' . $reason,
             ]);
         });
 
-        return back()->with('success', 'El retiro fue rechazado y el saldo devuelto a la cuenta del usuario.');
+        return back()->with('success', 'El retiro fue cancelado y el saldo ($' . number_format($withdrawal->amount, 0, ',', '.') . ' COP) fue devuelto a la cuenta del usuario. Motivo: "' . $reason . '"');
     }
 }

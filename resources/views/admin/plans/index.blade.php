@@ -19,19 +19,26 @@
     </div>
 
     <!-- Guía Rápida Informativa -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-900/40 p-4 rounded-2xl border border-slate-800/80 text-xs">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-900/40 p-4 rounded-2xl border border-slate-800/80 text-xs">
+        <div class="flex items-start gap-2.5">
+            <span class="text-lg">🏠</span>
+            <div>
+                <strong class="text-emerald-400">¿Mostrar en Inicio?</strong>
+                <p class="text-slate-400 mt-0.5">Elige con el botón <span class="text-white font-semibold">🏠</span> cuáles planes salen en la portada de Inicio del cliente. Los demás se verán en el catálogo <span class="text-white font-semibold">⚡ Planes</span>.</p>
+            </div>
+        </div>
         <div class="flex items-start gap-2.5">
             <span class="text-lg">🏷️</span>
             <div>
-                <strong class="text-cyan-400">¿Para qué es la Insignia / Badge?</strong>
-                <p class="text-slate-400 mt-0.5">Es la etiqueta visual que resalta el plan (ej: <span class="text-white font-semibold">"🔥 Más Popular", "⭐ Recomendado", "💎 VIP Élite"</span>).</p>
+                <strong class="text-cyan-400">Insignia / Badge</strong>
+                <p class="text-slate-400 mt-0.5">Etiqueta visual que resalta el plan (ej: <span class="text-white font-semibold">"🔥 Más Popular", "⭐ Recomendado"</span>).</p>
             </div>
         </div>
         <div class="flex items-start gap-2.5">
             <span class="text-lg">🛑</span>
             <div>
-                <strong class="text-amber-400">¿Para qué es el Tope Máximo ($ COP)?</strong>
-                <p class="text-slate-400 mt-0.5">Es el límite total de dinero que ganará el cliente antes de que el plan venza (ej: Invierte $30.000 y el tope es $45.000 COP).</p>
+                <strong class="text-amber-400">Tope Máximo ($ COP)</strong>
+                <p class="text-slate-400 mt-0.5">Límite total de dinero que ganará el cliente antes de que el plan venza.</p>
             </div>
         </div>
     </div>
@@ -41,10 +48,21 @@
         @foreach($plans as $plan)
             <div class="bg-slate-900/80 border {{ $plan->status ? 'border-slate-800' : 'border-rose-500/30 opacity-75' }} rounded-3xl p-6 flex flex-col justify-between relative shadow-xl">
                 <div>
-                    <div class="flex items-center justify-between">
-                        <span class="px-2.5 py-0.5 rounded-full {{ $plan->status ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400' }} text-[10px] font-extrabold uppercase">
-                            {{ $plan->status ? 'Activo' : 'Pausado' }}
-                        </span>
+                    <div class="flex flex-wrap items-center justify-between gap-1.5">
+                        <div class="flex items-center gap-1.5">
+                            <span class="px-2.5 py-0.5 rounded-full {{ $plan->status ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400' }} text-[10px] font-extrabold uppercase">
+                                {{ $plan->status ? 'Activo' : 'Pausado' }}
+                            </span>
+                            @if($plan->show_on_home)
+                                <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold" title="Visible en la pantalla de Inicio del cliente">
+                                    🏠 En Inicio
+                                </span>
+                            @else
+                                <span class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 text-[10px] font-semibold" title="Solo visible en el módulo Planes">
+                                    🌐 Solo Catálogo
+                                </span>
+                            @endif
+                        </div>
                         @if($plan->badge)
                             <span class="px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] font-bold uppercase">
                                 {{ $plan->badge }}
@@ -87,6 +105,7 @@
 
                 <!-- Botones de Acción -->
                 <div class="pt-4 border-t border-slate-800/80 flex items-center gap-2">
+                    <!-- Toggle Activar / Pausar -->
                     <form method="POST" action="{{ route('admin.plans.toggle', $plan->id) }}" class="flex-1">
                         @csrf
                         <button type="submit" class="w-full py-2 rounded-xl {{ $plan->status ? 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30' }} text-xs font-bold transition cursor-pointer">
@@ -94,10 +113,20 @@
                         </button>
                     </form>
 
+                    <!-- Toggle Mostrar en Inicio -->
+                    <form method="POST" action="{{ route('admin.plans.toggle-home', $plan->id) }}">
+                        @csrf
+                        <button type="submit" class="p-2 rounded-xl {{ $plan->show_on_home ? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/40' : 'bg-slate-800 hover:bg-slate-700 text-slate-400' }} transition cursor-pointer text-xs font-bold" title="{{ $plan->show_on_home ? 'Quitar de Inicio' : 'Poner en Inicio' }}">
+                            🏠
+                        </button>
+                    </form>
+
+                    <!-- Editar -->
                     <button onclick="openEditModal({{ json_encode($plan) }})" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition cursor-pointer" title="Editar">
                         ✏️
                     </button>
 
+                    <!-- Eliminar -->
                     <form id="del-plan-{{ $plan->id }}" method="POST" action="{{ route('admin.plans.destroy', $plan->id) }}">
                         @csrf
                         @method('DELETE')
@@ -186,9 +215,15 @@
                 <textarea name="description" rows="2" placeholder="Detalles o beneficios del plan..." class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-purple-500"></textarea>
             </div>
 
-            <div class="flex items-center gap-2 pt-1">
-                <input type="checkbox" name="status" id="status" value="1" checked class="rounded bg-slate-950 text-purple-600 focus:ring-purple-500">
-                <label for="status" class="text-slate-300 cursor-pointer">Activar inmediatamente para la venta</label>
+            <div class="space-y-2 pt-1">
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" name="status" id="status" value="1" checked class="rounded bg-slate-950 text-purple-600 focus:ring-purple-500">
+                    <label for="status" class="text-slate-300 cursor-pointer">Activar inmediatamente para la venta</label>
+                </div>
+                <div class="flex items-center gap-2 p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                    <input type="checkbox" name="show_on_home" id="show_on_home" value="1" checked class="rounded bg-slate-950 text-emerald-500 focus:ring-emerald-500">
+                    <label for="show_on_home" class="text-emerald-300 cursor-pointer font-semibold">🏠 Mostrar en la portada de Inicio del cliente</label>
+                </div>
             </div>
 
             <div class="flex justify-end gap-3 pt-4 border-t border-slate-800">
@@ -260,9 +295,15 @@
                 <textarea id="edit_description" name="description" rows="2" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none"></textarea>
             </div>
 
-            <div class="flex items-center gap-2 pt-1">
-                <input type="checkbox" name="status" id="edit_status" value="1" class="rounded bg-slate-950 text-purple-600">
-                <label for="edit_status" class="text-slate-300 cursor-pointer">Plan activo para la venta</label>
+            <div class="space-y-2 pt-1">
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" name="status" id="edit_status" value="1" class="rounded bg-slate-950 text-purple-600">
+                    <label for="edit_status" class="text-slate-300 cursor-pointer">Plan activo para la venta</label>
+                </div>
+                <div class="flex items-center gap-2 p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                    <input type="checkbox" name="show_on_home" id="edit_show_on_home" value="1" class="rounded bg-slate-950 text-emerald-500">
+                    <label for="edit_show_on_home" class="text-emerald-300 cursor-pointer font-semibold">🏠 Mostrar en la portada de Inicio del cliente</label>
+                </div>
             </div>
 
             <div class="flex justify-end gap-3 pt-4 border-t border-slate-800">
@@ -308,6 +349,7 @@
         document.getElementById('edit_stock').value = (plan.stock !== null && plan.stock !== undefined) ? plan.stock : '';
         document.getElementById('edit_description').value = plan.description || '';
         document.getElementById('edit_status').checked = plan.status ? true : false;
+        document.getElementById('edit_show_on_home').checked = plan.show_on_home ? true : false;
         document.getElementById('editPlanModal').classList.remove('hidden');
     }
 </script>

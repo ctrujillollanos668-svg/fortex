@@ -26,8 +26,9 @@ Route::middleware(['auth'])->group(function () {
     // Dashboard Principal
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Planes y Reclamo Diario
+    // Planes VIP (Catálogo para Comprar) & Mis Planes (Comprados y Reclamos)
     Route::get('/plans', [ClientPlanController::class, 'index'])->name('cliente.plans.index');
+    Route::get('/my-plans', [ClientPlanController::class, 'myPlans'])->name('cliente.plans.my-plans');
     Route::post('/plans/{id}/buy', [ClientPlanController::class, 'buy'])->name('cliente.plans.buy');
     Route::post('/plans/{id}/claim', [ClientPlanController::class, 'claimDaily'])->name('cliente.plans.claim');
 
@@ -74,6 +75,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::post('/plans', [AdminPlanController::class, 'store'])->name('plans.store');
     Route::put('/plans/{id}', [AdminPlanController::class, 'update'])->name('plans.update');
     Route::post('/plans/{id}/toggle', [AdminPlanController::class, 'toggle'])->name('plans.toggle');
+    Route::post('/plans/{id}/toggle-home', [AdminPlanController::class, 'toggleHome'])->name('plans.toggle-home');
     Route::delete('/plans/{id}', [AdminPlanController::class, 'destroy'])->name('plans.destroy');
 
     // Gestión de Usuarios / Clientes

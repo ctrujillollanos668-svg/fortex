@@ -102,13 +102,13 @@
             <span class="text-[8px] sm:text-[9px] text-slate-500 font-semibold truncate max-w-full px-0.5">Nequi / QR</span>
         </a>
 
-        <!-- 3. Finanzas -->
+        <!-- 3. Planes -->
         <a href="{{ route('cliente.plans.index') }}" class="group flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-2xl hover:bg-slate-800/60 transition active:scale-95">
             <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-purple-500/20 to-indigo-500/20 border border-purple-500/40 text-purple-300 flex items-center justify-center text-lg sm:text-xl mb-1 shadow-md group-hover:scale-110 transition">
-                📈
+                ⚡
             </div>
-            <span class="text-[11px] sm:text-xs font-bold text-slate-200">Finanzas</span>
-            <span class="text-[8px] sm:text-[9px] text-slate-500 font-semibold truncate max-w-full px-0.5">Rendimientos</span>
+            <span class="text-[11px] sm:text-xs font-bold text-slate-200">Planes</span>
+            <span class="text-[8px] sm:text-[9px] text-emerald-400 font-semibold truncate max-w-full px-0.5">Rendimientos</span>
         </a>
 
         <!-- 4. Centro de Ayuda -->
@@ -186,120 +186,110 @@
         </div>
     </div>
 
-    <!-- 7. TUS PAQUETES ACTIVOS (CON CONTADOR DE 24 HORAS EN VIVO) -->
-    <div id="mis-planes" class="space-y-3 pt-2">
-        <div class="flex items-center justify-between px-1">
-            <h3 class="text-xs sm:text-sm font-extrabold text-white flex items-center gap-1.5">
-                <span>⚡</span> Tus Paquetes Activos
-            </h3>
-            <span class="text-[11px] text-emerald-400 font-bold font-mono">{{ $userPlans->count() }} Activos</span>
-        </div>
-
-        @forelse($userPlans as $up)
-            <div class="bg-slate-900/90 border border-slate-800 hover:border-emerald-500/40 rounded-3xl p-4 shadow-xl space-y-3">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-extrabold uppercase border border-emerald-500/30">
-                            {{ $up->plan->name }}
-                        </span>
-                        <span class="text-xs text-white font-mono font-bold">${{ number_format($up->invested_amount, 0, ',', '.') }} COP</span>
+    <!-- 7. ACCESO RÁPIDO A TUS PAQUETES ACTIVOS (SI TIENE PAQUETES COMPRADOS) -->
+    @if($userPlans->count() > 0)
+        <a href="{{ route('cliente.plans.my-plans') }}" class="block bg-gradient-to-r from-emerald-950/90 via-slate-900 to-cyan-950/90 border border-emerald-500/40 hover:border-emerald-400 rounded-3xl p-4 sm:p-5 shadow-xl transition active:scale-[0.98]">
+            <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-[#00E599] flex items-center justify-center text-2xl shadow-inner shrink-0">
+                        ⚡
                     </div>
-                    <span class="text-xs font-mono font-bold text-emerald-400">+{{ $up->plan->daily_percentage }}% diario</span>
-                </div>
-
-                <!-- Progreso -->
-                <div>
-                    <div class="flex justify-between text-[10px] text-slate-400 mb-1">
-                        <span>Ganado: <strong class="text-emerald-400 font-mono" id="plan-earned-{{ $up->id }}">${{ number_format($up->earned_so_far, 0, ',', '.') }}</strong></span>
-                        <span>Tope: <strong class="text-amber-400 font-mono">${{ number_format($up->max_earning, 0, ',', '.') }} COP</strong></span>
-                    </div>
-                    @php
-                        $percent = $up->max_earning > 0 ? min(100, round(($up->earned_so_far / $up->max_earning) * 100)) : 0;
-                    @endphp
-                    <div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
-                        <div id="plan-progress-{{ $up->id }}" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500" style="width: {{ $percent }}%"></div>
-                    </div>
-                </div>
-
-                <!-- Botón o Cuenta Regresiva de 24 Horas -->
-                <div id="plan-action-container-{{ $up->id }}">
-                    @if(!$up->canClaim())
-                        <div class="py-2.5 px-3.5 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-between text-xs">
-                            <span class="text-slate-400">⏳ Próximo reclamo:</span>
-                            <span class="countdown-timer font-mono text-amber-400 font-extrabold" data-seconds="{{ $up->secondsUntilNextClaim() }}">Calculando...</span>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-[#00E599] text-[10px] font-black uppercase tracking-wider border border-emerald-500/30">
+                                {{ $userPlans->count() }} {{ $userPlans->count() == 1 ? 'PAQUETE ACTIVO' : 'PAQUETES ACTIVOS' }}
+                            </span>
+                            <span class="w-2 h-2 rounded-full bg-[#00E599] animate-pulse"></span>
                         </div>
-                    @else
-                        <form method="POST" action="{{ route('cliente.plans.claim', $up->id) }}" onsubmit="handleClaimDaily(event, {{ $up->id }}, '{{ route('cliente.plans.claim', $up->id) }}')">
-                            @csrf
-                            <button type="submit" id="btn-claim-{{ $up->id }}" class="w-full py-3 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-black rounded-xl text-xs shadow-lg shadow-emerald-500/25 transition active:scale-95 cursor-pointer animate-pulse">
-                                🎁 Reclamar Ganancia (+${{ number_format($up->daily_earning, 0, ',', '.') }} COP)
-                            </button>
-                        </form>
-                    @endif
+                        <h4 class="text-sm sm:text-base font-black text-white mt-1">Tus Paquetes Comprados</h4>
+                        <p class="text-[11px] text-slate-300">Generando rendimientos diarios • Reclama tu dinero cada 24h</p>
+                    </div>
+                </div>
+                <div class="shrink-0 text-right">
+                    <span class="px-3.5 py-2 bg-[#00D287] hover:bg-[#00BF7A] text-slate-950 font-black text-xs rounded-xl shadow-md transition inline-flex items-center gap-1">
+                        <span>Ver y Reclamar</span>
+                        <span>→</span>
+                    </span>
                 </div>
             </div>
-        @empty
-            <div class="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 text-center text-slate-400 text-xs">
-                <span class="text-2xl block mb-1">📦</span>
-                No tienes paquetes activos. Elige uno abajo para empezar a generar rendimientos diarios.
-            </div>
-        @endforelse
-    </div>
+        </a>
+    @endif
 
     <!-- 8. CATÁLOGO DE PLANES VIP (COMPRA CON SALDO DISPONIBLE) -->
     <div class="space-y-3 pt-2">
-        <div class="flex items-center justify-between px-1">
-            <h3 class="text-xs sm:text-sm font-extrabold text-white flex items-center gap-1.5">
-                <span>⭐</span> Membresías VIP Disponibles
+        <div class="flex items-center justify-between px-1 mb-1">
+            <h3 class="text-sm sm:text-base font-extrabold text-white flex items-center gap-2">
+                <span class="text-yellow-400">⭐</span> Membresías VIP Disponibles
             </h3>
-            <span class="text-[10px] text-slate-400">Valores en $ COP</span>
+            <span class="text-xs text-slate-400 font-medium">Valores en $ COP</span>
         </div>
 
-        <div class="space-y-3">
+        <div class="space-y-4">
             @foreach($availablePlans as $plan)
-                <div class="bg-slate-900/90 border border-slate-800 hover:border-emerald-500/40 rounded-3xl p-4 shadow-xl flex flex-col justify-between transition {{ $plan->isSoldOut() ? 'opacity-60 grayscale' : '' }}">
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center gap-1.5 flex-wrap">
-                            <span class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-200 text-[10px] font-extrabold uppercase border border-slate-700">
-                                {{ $plan->badge ?? 'VIP' }}
+                <div class="bg-[#0b1222]/90 border border-slate-800/90 rounded-[28px] p-5 shadow-2xl space-y-3.5 transition hover:border-slate-700 {{ $plan->isSoldOut() ? 'opacity-60 grayscale' : '' }}">
+                    <!-- Top Row: Badge left, Percentage right -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            @php
+                                $rawBadge = trim($plan->badge ?? 'BÁSICO');
+                                $badgeIcon = '';
+                                if(stripos($rawBadge, 'popular') !== false) {
+                                    $badgeIcon = '🔥 ';
+                                } elseif(stripos($rawBadge, 'recomendado') !== false) {
+                                    $badgeIcon = '💎 ';
+                                } elseif(stripos($rawBadge, 'exclusivo') !== false || stripos($rawBadge, 'vip') !== false) {
+                                    $badgeIcon = '👑 ';
+                                }
+                            @endphp
+                            <span class="px-3.5 py-1 rounded-full bg-[#1e293b]/90 border border-slate-700/60 text-slate-200 text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider">
+                                {{ $badgeIcon }}{{ $rawBadge }}
                             </span>
                             @if($plan->isSoldOut())
-                                <span class="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-400 text-[9px] font-black uppercase border border-rose-500/40">
+                                <span class="px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-400 text-[10px] font-bold uppercase border border-rose-500/30">
                                     🔴 Agotado
                                 </span>
                             @elseif($plan->hasStockLimit())
-                                <span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-[9px] font-black uppercase border border-amber-500/40">
+                                <span class="px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold uppercase border border-amber-500/30">
                                     ⚡ Quedan {{ $plan->stock }} cupos
                                 </span>
                             @endif
                         </div>
-                        <span class="text-xs font-bold text-emerald-400 font-mono">{{ $plan->daily_percentage }}% diario</span>
+                        <span class="text-sm font-bold text-[#00E599] font-mono tracking-tight">{{ number_format($plan->daily_percentage, 2) }}% diario</span>
                     </div>
 
-                    <div class="flex items-center justify-between my-1">
+                    <!-- Middle Row: Plan Name & Subtitle left, Price & COP right -->
+                    <div class="flex items-center justify-between pt-1">
                         <div>
-                            <h4 class="text-sm font-black text-white">{{ $plan->name }}</h4>
-                            <p class="text-[10px] text-slate-400">Paga ${{ number_format(($plan->price * $plan->daily_percentage) / 100, 0, ',', '.') }} COP / día ({{ $plan->duration_days }} días)</p>
+                            <h4 class="text-base sm:text-lg font-black text-white tracking-tight">{{ $plan->name }}</h4>
+                            <p class="text-xs text-slate-400 mt-0.5">Paga ${{ number_format(($plan->price * $plan->daily_percentage) / 100, 0, ',', '.') }} COP / día ({{ $plan->duration_days }} días)</p>
                         </div>
                         <div class="text-right">
-                            <span class="text-base font-black text-white font-mono">${{ number_format($plan->price, 0, ',', '.') }}</span>
-                            <span class="text-[10px] text-slate-500 block">COP</span>
+                            <span class="text-xl sm:text-2xl font-black text-white font-mono tracking-tight">${{ number_format($plan->price, 0, ',', '.') }}</span>
+                            <span class="text-[11px] text-slate-400 font-semibold block uppercase tracking-wider">COP</span>
                         </div>
                     </div>
 
-                    <div class="mt-2">
+                    <!-- Bottom Row: Full width Mint/Emerald Button -->
+                    <div class="pt-1">
                         @if($plan->isSoldOut())
-                            <button type="button" disabled class="w-full py-2.5 bg-slate-800 text-slate-500 font-bold rounded-xl text-xs cursor-not-allowed border border-slate-700">
+                            <button type="button" disabled class="w-full py-3.5 bg-slate-800 text-slate-500 font-bold rounded-2xl text-xs sm:text-sm cursor-not-allowed border border-slate-700">
                                 ❌ Agotado (Sin cupos)
                             </button>
                         @else
-                            <button type="button" onclick="openBuyModalDashboard({{ $plan->id }}, '{{ addslashes($plan->name) }}', {{ $plan->price }}, '{{ number_format($plan->price, 0, ',', '.') }}')" class="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-black rounded-xl text-xs shadow-md transition active:scale-95 cursor-pointer">
-                                ⚡ Activar {{ $plan->name }}
+                            <button type="button" onclick="openBuyModalDashboard({{ $plan->id }}, '{{ addslashes($plan->name) }}', {{ $plan->price }}, '{{ number_format($plan->price, 0, ',', '.') }}')" class="w-full py-3.5 bg-[#00D287] hover:bg-[#00BF7A] text-slate-950 font-black rounded-2xl text-xs sm:text-sm shadow-lg shadow-[#00D287]/20 transition duration-200 active:scale-[0.98] flex items-center justify-center gap-1.5 cursor-pointer">
+                                <span>⚡</span> Activar {{ $plan->name }}
                             </button>
                         @endif
                     </div>
                 </div>
             @endforeach
+        </div>
+
+        <div class="pt-2 text-center">
+            <a href="{{ route('cliente.plans.index') }}" class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-emerald-500/40 text-emerald-400 font-bold text-xs transition active:scale-95 shadow-lg">
+                <span>⚡ Ver catálogo completo de planes</span>
+                <span>→</span>
+            </a>
         </div>
     </div>
 

@@ -77,11 +77,14 @@
 
             <!-- Navegación para Portátiles / Pantallas Grandes (Desktop Nav) -->
             <nav class="hidden lg:flex items-center gap-6 text-xs font-bold text-slate-300">
-                <a href="{{ route('dashboard') }}" class="transition hover:text-emerald-400 {{ request()->routeIs('dashboard') ? 'text-emerald-400' : '' }}">
+                <a href="{{ route('dashboard') }}" class="transition hover:text-emerald-400 {{ request()->routeIs('dashboard') ? 'text-emerald-400 font-extrabold' : '' }}">
                     🏠 Inicio
                 </a>
-                <a href="{{ route('cliente.plans.index') }}" class="transition hover:text-emerald-400 {{ request()->routeIs('cliente.plans.*') ? 'text-emerald-400' : '' }}">
-                    ⚡ Planes VIP
+                <a href="{{ route('cliente.plans.index') }}" class="transition hover:text-emerald-400 {{ request()->routeIs('cliente.plans.index') ? 'text-emerald-400 font-extrabold' : '' }}">
+                    ⚡ Planes
+                </a>
+                <a href="{{ route('cliente.plans.my-plans') }}" class="transition hover:text-emerald-400 {{ request()->routeIs('cliente.plans.my-plans') ? 'text-emerald-400 font-extrabold' : '' }}">
+                    📦 Mis Planes
                 </a>
                 <a href="{{ route('cliente.deposits.index') }}" class="transition hover:text-emerald-400 {{ request()->routeIs('cliente.deposits.*') ? 'text-emerald-400' : '' }}">
                     ➕ Recargar
@@ -132,34 +135,40 @@
 
     <!-- BARRA DE NAVEGACIÓN INFERIOR PARA TELÉFONOS (SE OCULTA EN PORTÁTILES) -->
     <nav class="fixed bottom-0 left-0 right-0 z-50 bg-slate-950/95 border-t border-slate-800/90 bottom-nav-blur bottom-nav-safe lg:hidden">
-        <div class="max-w-md mx-auto px-2 sm:px-6 h-16 flex items-center justify-around text-center">
+        <div class="max-w-md mx-auto px-1 sm:px-4 h-16 flex items-center justify-around text-center">
             <!-- 1. Inicio -->
-            <a href="{{ route('dashboard') }}" class="flex flex-col items-center gap-1 transition px-2 py-1 {{ request()->routeIs('dashboard') ? 'text-emerald-400 scale-105' : 'text-slate-400 hover:text-slate-200' }}">
-                <span class="text-lg leading-none">🏠</span>
-                <span class="text-[10px] font-bold">Inicio</span>
+            <a href="{{ route('dashboard') }}" class="flex flex-col items-center gap-1 transition px-1 py-1 {{ request()->routeIs('dashboard') ? 'text-emerald-400 scale-105 font-bold' : 'text-slate-400 hover:text-slate-200' }}">
+                <span class="text-base leading-none">🏠</span>
+                <span class="text-[9px]">Inicio</span>
             </a>
 
-            <!-- 2. Planes VIP -->
-            <a href="{{ route('cliente.plans.index') }}" class="flex flex-col items-center gap-1 transition px-2 py-1 {{ request()->routeIs('cliente.plans.*') ? 'text-emerald-400 scale-105' : 'text-slate-400 hover:text-slate-200' }}">
-                <span class="text-lg leading-none">⚡</span>
-                <span class="text-[10px] font-bold">Planes</span>
+            <!-- 2. Planes (Catálogo para comprar) -->
+            <a href="{{ route('cliente.plans.index') }}" class="flex flex-col items-center gap-1 transition px-1 py-1 {{ request()->routeIs('cliente.plans.index') ? 'text-emerald-400 scale-105 font-bold' : 'text-slate-400 hover:text-slate-200' }}">
+                <span class="text-base leading-none">⚡</span>
+                <span class="text-[9px]">Planes</span>
             </a>
 
-            <!-- 3. Recargar (Botón Central Destacado) -->
-            <a href="{{ route('cliente.deposits.index') }}" class="-mt-5 w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 flex items-center justify-center text-xl font-extrabold shadow-lg shadow-emerald-500/30 active:scale-95 transition shrink-0">
+            <!-- 3. Mis Planes (Comprados) -->
+            <a href="{{ route('cliente.plans.my-plans') }}" class="flex flex-col items-center gap-1 transition px-1 py-1 {{ request()->routeIs('cliente.plans.my-plans') ? 'text-emerald-400 scale-105 font-bold' : 'text-slate-400 hover:text-slate-200' }}">
+                <span class="text-base leading-none">📦</span>
+                <span class="text-[9px]">Mis Planes</span>
+            </a>
+
+            <!-- 4. Recargar (Botón Central Destacado) -->
+            <a href="{{ route('cliente.deposits.index') }}" class="-mt-4 w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 flex items-center justify-center text-lg font-extrabold shadow-lg shadow-emerald-500/30 active:scale-95 transition shrink-0">
                 ➕
             </a>
 
-            <!-- 4. Mi Equipo / Referidos -->
-            <a href="{{ route('cliente.team.index') }}" class="flex flex-col items-center gap-1 transition px-2 py-1 {{ request()->routeIs('cliente.team.*') ? 'text-emerald-400 scale-105' : 'text-slate-400 hover:text-slate-200' }}">
-                <span class="text-lg leading-none">👥</span>
-                <span class="text-[10px] font-bold">Equipo</span>
+            <!-- 5. Mi Red (10%) -->
+            <a href="{{ route('cliente.team.index') }}" class="flex flex-col items-center gap-1 transition px-1 py-1 {{ request()->routeIs('cliente.team.*') ? 'text-emerald-400 scale-105 font-bold' : 'text-slate-400 hover:text-slate-200' }}">
+                <span class="text-base leading-none">👥</span>
+                <span class="text-[9px]">Mi Red</span>
             </a>
 
-            <!-- 5. Retirar -->
-            <a href="{{ route('cliente.withdrawals.index') }}" class="flex flex-col items-center gap-1 transition px-2 py-1 {{ request()->routeIs('cliente.withdrawals.*') ? 'text-cyan-400 scale-105' : 'text-slate-400 hover:text-slate-200' }}">
-                <span class="text-lg leading-none">💸</span>
-                <span class="text-[10px] font-bold">Retirar</span>
+            <!-- 6. Retirar -->
+            <a href="{{ route('cliente.withdrawals.index') }}" class="flex flex-col items-center gap-1 transition px-1 py-1 {{ request()->routeIs('cliente.withdrawals.*') ? 'text-cyan-400 scale-105 font-bold' : 'text-slate-400 hover:text-slate-200' }}">
+                <span class="text-base leading-none">💸</span>
+                <span class="text-[9px]">Retirar</span>
             </a>
         </div>
     </nav>

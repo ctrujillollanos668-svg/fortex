@@ -13,16 +13,31 @@ use Illuminate\Support\Facades\DB;
 
 class ClientPlanController extends Controller
 {
+    /**
+     * Módulo: Planes (Catálogo de Planes VIP creados por el Admin listos para Comprar).
+     */
     public function index()
     {
         $user = Auth::user();
         $availablePlans = Plan::where('status', true)->get();
+        $rechargeBalance = $user->rechargeBalance();
+        $earningsBalance = $user->earningsBalance();
+
+        return view('cliente.plans.index', compact('user', 'availablePlans', 'rechargeBalance', 'earningsBalance'));
+    }
+
+    /**
+     * Módulo: Mis Planes (Solo los planes que el cliente ha comprado y tiene activos/completados).
+     */
+    public function myPlans()
+    {
+        $user = Auth::user();
         $activePlans = $user->userPlans()->with('plan')->where('status', 'active')->get();
         $completedPlans = $user->userPlans()->with('plan')->where('status', 'completed')->get();
         $rechargeBalance = $user->rechargeBalance();
         $earningsBalance = $user->earningsBalance();
 
-        return view('cliente.plans.index', compact('user', 'availablePlans', 'activePlans', 'completedPlans', 'rechargeBalance', 'earningsBalance'));
+        return view('cliente.plans.my_plans', compact('user', 'activePlans', 'completedPlans', 'rechargeBalance', 'earningsBalance'));
     }
 
     public function buy(Request $request, $id)
@@ -125,7 +140,7 @@ class ClientPlanController extends Controller
         });
 
         $walletLabel = $source === 'deposit' ? 'Saldo de Recargas' : 'Saldo de Ganancias';
-        return redirect()->route('cliente.plans.index')
+        return redirect()->route('cliente.plans.my-plans')
             ->with('success', '🎉 ¡Felicidades! Has activado el ' . $plan->name . ' usando tu ' . $walletLabel . '. Tu primer rendimiento de 24 horas ya comenzó a correr.');
     }
 

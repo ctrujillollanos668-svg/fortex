@@ -24,7 +24,13 @@ class DashboardController extends Controller
         }
 
         // Si es cliente autenticado, cargar la app móvil VIP (cliente/dashboard.blade.php)
-        $availablePlans = Plan::where('status', true)->get();
+        // En Inicio solo se muestran los planes que el admin eligió mostrar en el Inicio
+        $availablePlans = Plan::where('status', true)->where('show_on_home', true)->latest()->get();
+
+        // Si el admin aún no ha marcado ninguno específico para el inicio, mostrar los primeros 2 o 3 activos
+        if ($availablePlans->isEmpty()) {
+            $availablePlans = Plan::where('status', true)->latest()->take(3)->get();
+        }
 
         $userPlans = $user->userPlans()
             ->with('plan')

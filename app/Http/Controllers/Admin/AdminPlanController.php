@@ -58,6 +58,7 @@ class AdminPlanController extends Controller
             'badge' => $request->badge,
             'stock' => $request->filled('stock') ? (int) $request->stock : null,
             'status' => $request->has('status') ? true : true, // Activo por defecto para que aparezca de inmediato a admin y cliente
+            'show_on_home' => $request->has('show_on_home') ? true : false,
         ]);
 
         return back()->with('success', '🎉 ¡Nuevo Plan VIP creado correctamente y activado en el sistema!');
@@ -108,6 +109,7 @@ class AdminPlanController extends Controller
             'badge' => $request->badge,
             'stock' => $request->filled('stock') ? (int) $request->stock : null,
             'status' => $request->has('status') ? true : false,
+            'show_on_home' => $request->has('show_on_home') ? true : false,
         ]);
 
         return back()->with('success', '¡Plan VIP actualizado correctamente!');
@@ -121,6 +123,16 @@ class AdminPlanController extends Controller
 
         $state = $plan->status ? 'activado' : 'pausado';
         return back()->with('success', "El plan {$plan->name} fue {$state}.");
+    }
+
+    public function toggleHome($id)
+    {
+        $plan = Plan::findOrFail($id);
+        $plan->show_on_home = ! $plan->show_on_home;
+        $plan->save();
+
+        $state = $plan->show_on_home ? 'ahora se mostrará en la pantalla de Inicio' : 'se ocultó de Inicio (solo se verá en el catálogo Planes)';
+        return back()->with('success', "🏠 El plan {$plan->name} {$state}.");
     }
 
     public function destroy($id)

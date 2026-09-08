@@ -20,6 +20,7 @@ class Plan extends Model
         'badge',
         'stock',
         'status',
+        'show_on_home',
     ];
 
     protected function casts(): array
@@ -30,6 +31,7 @@ class Plan extends Model
             'max_return' => 'decimal:2',
             'stock' => 'integer',
             'status' => 'boolean',
+            'show_on_home' => 'boolean',
         ];
     }
 
