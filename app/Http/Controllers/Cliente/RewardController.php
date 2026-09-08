@@ -48,19 +48,14 @@ class RewardController extends Controller
             }
 
             // Comprobar si tiene giros disponibles
-            $availableSpins = $user->roulette_spins ?? 0;
-            $canSpinByTime = true;
+            $availableSpins = (int) ($user->roulette_spins ?? 0);
 
-            if ($user->last_spin_at) {
-                $hoursSinceLastSpin = now()->diffInHours($user->last_spin_at);
-                if ($hoursSinceLastSpin < 24 && $availableSpins <= 0) {
-                    $canSpinByTime = false;
-                    $remainingHours = 24 - $hoursSinceLastSpin;
-                    return response()->json([
-                        'success' => false,
-                        'message' => "⏳ Ya utilizaste tu giro diario. Podrás girar de nuevo en {$remainingHours} hora(s) o acumulando giros por recargas/compras.",
-                    ], 422);
-                }
+            if ($availableSpins <= 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => '⚠️ No tienes giros disponibles. Recarga saldo a tu cuenta (+3 giros) o invita amigos que recarguen para ganar más giros.',
+                    'remaining_spins' => 0,
+                ], 422);
             }
 
             // Premios en pesos colombianos ($ COP) configurados con pesos probabilísticos

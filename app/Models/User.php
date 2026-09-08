@@ -53,10 +53,6 @@ class User extends Authenticatable
 
     public function canSpin(): bool
     {
-        // Si nunca ha girado en la ruleta, siempre tiene al menos 1 tiro disponible
-        if ($this->last_spin_at === null && ($this->roulette_spins === null || $this->roulette_spins <= 0)) {
-            return true;
-        }
         return (int) ($this->roulette_spins ?? 0) > 0;
     }
 

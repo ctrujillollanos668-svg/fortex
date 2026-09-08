@@ -165,7 +165,7 @@
         <div onclick="openRouletteModal()" class="bg-gradient-to-br from-amber-950/80 via-slate-900 to-slate-900 border border-amber-500/40 rounded-2xl p-3.5 cursor-pointer hover:border-amber-400 transition shadow-lg flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-2xl">🎡</span>
-                <span class="text-[9px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 font-extrabold">DIARIO</span>
+                <span class="text-[9px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 font-extrabold">PREMIOS</span>
             </div>
             <div>
                 <h4 class="text-xs font-bold text-white">Ruleta de la suerte &gt;</h4>
@@ -491,7 +491,7 @@
         </div>
         
         @php
-            $userSpins = (Auth::user()->last_spin_at === null && (Auth::user()->roulette_spins === null || Auth::user()->roulette_spins <= 0)) ? 1 : (Auth::user()->roulette_spins ?? 0);
+            $userSpins = (int) (Auth::user()->roulette_spins ?? 0);
         @endphp
 
         <!-- Contador de Giros Disponibles -->
@@ -536,17 +536,19 @@
         </div>
 
         <div id="rouletteStatusMessage" class="text-[11px] text-amber-400/90 font-medium mb-3">
-            {{ $userSpins > 0 ? '¡Presiona GIRAR para probar tu suerte!' : '¡Invita amigos para ganar más giros!' }}
+            {{ $userSpins > 0 ? '¡Presiona GIRAR para probar tu suerte!' : '⚠️ No tienes giros disponibles actualmente.' }}
         </div>
 
         <!-- Banner Explicativo de Dinámica de Recarga y Giros -->
         <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 text-left text-[11px] space-y-1.5">
             <div class="flex items-center justify-between text-amber-300 font-bold">
-                <span class="flex items-center gap-1.5"><span>⚡</span> Recompensas de la Ruleta</span>
+                <span class="flex items-center gap-1.5"><span>⚡</span> ¿Cómo Obtener Giros?</span>
                 <span class="text-[9px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono">👑 Hasta $13.000 COP</span>
             </div>
             <p class="text-slate-300 text-[10px] leading-relaxed">
-                🎉 <strong>¡Premios en efectivo garantizados en cada giro!</strong> Gira la ruleta y recibe ganancias directas a tu saldo de hasta <strong class="text-emerald-400 font-bold">$13.000 COP</strong>. Recarga tu cuenta para ganar <strong class="text-cyan-300">+3 Giros Gratis</strong> o comparte tu enlace de referido para obtener más oportunidades.
+                🎉 <strong>¡1 Giro Gratis de bienvenida garantizado para nuevos miembros!</strong><br>
+                • Recarga saldo a tu cuenta y recibe <strong class="text-cyan-300">+3 Giros de Ruleta</strong>.<br>
+                • Invita amigos con tu link de referido y gana <strong class="text-emerald-400">+2 Giros Extras</strong> cuando realicen su primera recarga.
             </p>
             <div class="grid grid-cols-2 gap-2 pt-1">
                 <a href="{{ route('cliente.deposits.index') }}" class="py-2 bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-black text-center rounded-xl text-[11px] shadow-md transition active:scale-95">
