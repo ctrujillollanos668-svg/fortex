@@ -77,6 +77,8 @@ class RegisteredUserController extends Controller
             'referral_code' => $newReferralCode,
             'referred_by' => $sponsorId,
             'status' => 'active',
+            'roulette_spins' => 1, // 1 giro de bienvenida gratis garantizado
+            'claimed_red_packet' => false,
         ]);
 
         // Premiar al patrocinador con 1 giro adicional de ruleta por invitar

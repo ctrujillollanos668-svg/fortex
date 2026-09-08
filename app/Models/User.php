@@ -34,21 +34,30 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'last_spin_at' => 'datetime',
-            'roulette_spins' => 'integer',
-            'claimed_red_packet' => 'boolean',
-            'password' => 'hashed',
-            'balance' => 'decimal:2',
-        ];
-    }
+    protected $attributes = [
+        'roulette_spins' => 1,
+        'balance' => 0.00,
+        'role' => 'cliente',
+        'status' => 'active',
+        'claimed_red_packet' => false,
+    ];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'last_spin_at' => 'datetime',
+        'roulette_spins' => 'integer',
+        'claimed_red_packet' => 'boolean',
+        'password' => 'hashed',
+        'balance' => 'decimal:2',
+    ];
 
     public function canSpin(): bool
     {
-        return ($this->roulette_spins ?? 0) > 0;
+        // Si nunca ha girado en la ruleta, siempre tiene al menos 1 tiro disponible
+        if ($this->last_spin_at === null && ($this->roulette_spins === null || $this->roulette_spins <= 0)) {
+            return true;
+        }
+        return (int) ($this->roulette_spins ?? 0) > 0;
     }
 
     public function secondsUntilNextSpin(): int

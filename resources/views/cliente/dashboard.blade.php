@@ -480,9 +480,13 @@
             <h3 class="text-base font-black text-white">Ruleta de la Suerte VIP</h3>
         </div>
         
+        @php
+            $userSpins = (Auth::user()->last_spin_at === null && (Auth::user()->roulette_spins === null || Auth::user()->roulette_spins <= 0)) ? 1 : (Auth::user()->roulette_spins ?? 0);
+        @endphp
+
         <!-- Contador de Giros Disponibles -->
         <div class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-black mb-3">
-            <span>🎟️</span> Giros Disponibles: <span id="spinsLeftBadge" class="text-white font-mono text-sm">{{ Auth::user()->roulette_spins ?? 1 }}</span>
+            <span>🎟️</span> Giros Disponibles: <span id="spinsLeftBadge" class="text-white font-mono text-sm">{{ $userSpins }}</span>
         </div>
 
         <!-- RUEDA GIRATORIA VISUAL CON PREMIOS -->
@@ -516,13 +520,13 @@
                 <!-- Botón Central de Giro -->
                 <button id="spinBtn" type="button" onclick="spinRoulette()" class="absolute z-10 w-16 h-16 rounded-full bg-slate-950 border-4 border-amber-400 text-amber-400 font-black text-xs flex flex-col items-center justify-center shadow-2xl hover:scale-105 active:scale-95 transition cursor-pointer">
                     <span>GIRAR</span>
-                    <span class="text-[8px] text-slate-400 font-mono" id="spinCenterLabel">{{ (Auth::user()->roulette_spins ?? 1) > 0 ? (Auth::user()->roulette_spins ?? 1) . 'x' : '0x' }}</span>
+                    <span class="text-[8px] text-slate-400 font-mono" id="spinCenterLabel">{{ $userSpins > 0 ? $userSpins . 'x' : '0x' }}</span>
                 </button>
             </div>
         </div>
 
         <div id="rouletteStatusMessage" class="text-[11px] text-amber-400/90 font-medium mb-3">
-            {{ (Auth::user()->roulette_spins ?? 1) > 0 ? '¡Presiona GIRAR para probar tu suerte!' : '¡Invita amigos para ganar más giros!' }}
+            {{ $userSpins > 0 ? '¡Presiona GIRAR para probar tu suerte!' : '¡Invita amigos para ganar más giros!' }}
         </div>
 
         <!-- Banner Explicativo de Dinámica de Recarga y Giros -->

@@ -48,7 +48,13 @@ class RewardController extends Controller
             // Recargar datos frescos del usuario
             $user->refresh();
 
-            $spinsAvailable = $user->roulette_spins ?? 1;
+            // Si el usuario nunca ha girado (usuario nuevo) y sus giros están en 0 o null, garantizar su giro gratis de bienvenida
+            if ($user->last_spin_at === null && ($user->roulette_spins === null || (int)$user->roulette_spins <= 0)) {
+                $user->roulette_spins = 1;
+                $user->save();
+            }
+
+            $spinsAvailable = (int) ($user->roulette_spins ?? 0);
 
             if ($spinsAvailable <= 0) {
                 return response()->json([
