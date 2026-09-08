@@ -211,7 +211,7 @@
             <div>
                 <label class="block font-semibold text-slate-300 mb-1">Premio que Acredita al Saldo ($ COP)</label>
                 <div class="relative">
-                    <input type="number" step="1000" min="100" name="reward_amount" required placeholder="Ej: 20000" class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-white font-mono text-sm focus:outline-none focus:border-emerald-500">
+                    <input type="number" step="any" min="100" name="reward_amount" required placeholder="Ej: 20000" class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-white font-mono text-sm focus:outline-none focus:border-emerald-500">
                     <span class="absolute right-4 top-3.5 text-xs text-emerald-400 font-bold">COP</span>
                 </div>
             </div>
