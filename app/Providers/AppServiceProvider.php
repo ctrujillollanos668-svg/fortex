@@ -23,7 +23,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Auto-sincronización segura y ultrarrápida para Wasmer / Serverless
         try {
-            if (!cache()->has('system_db_sync_v6')) {
+            if (!cache()->has('system_db_sync_v7')) {
                 // 1. Columnas en tabla users
                 if (Schema::hasTable('users')) {
                     if (!Schema::hasColumn('users', 'last_spin_at')) {
@@ -66,7 +66,34 @@ class AppServiceProvider extends ServiceProvider
                     }
                 }
 
-                cache()->forever('system_db_sync_v6', true);
+                // 4. Tablas para Códigos Promocionales y Sorteos
+                if (!Schema::hasTable('promo_codes')) {
+                    Schema::create('promo_codes', function (Blueprint $table) {
+                        $table->id();
+                        $table->string('code')->unique();
+                        $table->decimal('reward_amount', 12, 2)->default(0);
+                        $table->unsignedInteger('max_uses')->default(1);
+                        $table->unsignedInteger('used_count')->default(0);
+                        $table->boolean('status')->default(true);
+                        $table->string('description')->nullable();
+                        $table->timestamp('expires_at')->nullable();
+                        $table->timestamps();
+                    });
+                }
+
+                if (!Schema::hasTable('promo_code_redemptions')) {
+                    Schema::create('promo_code_redemptions', function (Blueprint $table) {
+                        $table->id();
+                        $table->unsignedBigInteger('promo_code_id');
+                        $table->unsignedBigInteger('user_id');
+                        $table->decimal('reward_amount', 12, 2)->default(0);
+                        $table->timestamps();
+
+                        $table->index(['promo_code_id', 'user_id']);
+                    });
+                }
+
+                cache()->forever('system_db_sync_v7', true);
             }
         } catch (\Throwable $e) {
             // Continuar sin bloquear el request

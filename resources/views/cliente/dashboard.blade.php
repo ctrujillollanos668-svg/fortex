@@ -584,20 +584,22 @@
             </button>
         </div>
 
-        <!-- SECCIÓN 2: CANJEAR CÓDIGO PROMOCIONAL DE TELEGRAM -->
+        <!-- SECCIÓN 2: CANJEAR CÓDIGO DE SORTEO O REGALO -->
         <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 text-left">
             <label class="block text-[11px] font-bold text-slate-300 mb-1.5 flex items-center justify-between">
-                <span>¿Tienes un Código Secreto?</span>
-                <span class="text-[9px] text-emerald-400">Telegram / Redes</span>
+                <span>¿Tienes un Código de Sorteo?</span>
+                <span class="text-[9px] text-rose-400 font-bold">Oficial</span>
             </label>
             
             <div class="flex gap-2">
-                <input type="text" id="promoCodeInput" placeholder="Ej: VIP2026" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono uppercase text-xs focus:outline-none focus:border-rose-500">
+                <input type="text" id="promoCodeInput" placeholder="EJ: FORTEX-8492" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono uppercase text-xs focus:outline-none focus:border-rose-500">
                 <button onclick="claimPromoCode()" class="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs whitespace-nowrap transition cursor-pointer active:scale-95">
                     Canjear
                 </button>
             </div>
-            <span class="text-[9px] text-slate-500 mt-1 block">Prueba con los códigos: <b class="text-slate-400">VIP2026</b>, <b class="text-slate-400">BONO777</b> o <b class="text-slate-400">FORTEX</b></span>
+            <span class="text-[9px] text-slate-500 mt-1.5 block leading-tight">
+                Ingresa el código exclusivo entregado por el Administrador en dinámicas y sorteos oficiales de Telegram o WhatsApp.
+            </span>
         </div>
     </div>
 </div>

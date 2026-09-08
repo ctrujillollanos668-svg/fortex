@@ -91,6 +91,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::post('/payment-methods/{id}/toggle', [\App\Http\Controllers\Admin\AdminPaymentMethodController::class, 'toggle'])->name('payment-methods.toggle');
     Route::delete('/payment-methods/{id}', [\App\Http\Controllers\Admin\AdminPaymentMethodController::class, 'destroy'])->name('payment-methods.destroy');
     
+    // Gestión y Creación de Códigos de Sorteo / Regalo
+    Route::get('/promo-codes', [\App\Http\Controllers\Admin\AdminPromoCodeController::class, 'index'])->name('promo-codes.index');
+    Route::post('/promo-codes', [\App\Http\Controllers\Admin\AdminPromoCodeController::class, 'store'])->name('promo-codes.store');
+    Route::post('/promo-codes/{id}/toggle', [\App\Http\Controllers\Admin\AdminPromoCodeController::class, 'toggle'])->name('promo-codes.toggle');
+    Route::delete('/promo-codes/{id}', [\App\Http\Controllers\Admin\AdminPromoCodeController::class, 'destroy'])->name('promo-codes.destroy');
+
     // Alias de settings hacia payment-methods
     Route::get('/settings', function() { return redirect()->route('admin.payment-methods.index'); })->name('settings.index');
 });

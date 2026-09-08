@@ -104,6 +104,11 @@
                     <span>Cuentas de Pago & QR</span>
                 </a>
 
+                <a href="{{ route('admin.promo-codes.index') }}" class="flex items-center gap-3 px-3.5 py-3 rounded-xl transition {{ request()->routeIs('admin.promo-codes.*') ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                    <span class="text-base">🎁</span>
+                    <span>Códigos de Sorteo / Regalo</span>
+                </a>
+
                 <a href="{{ route('dashboard') }}" target="_blank" class="flex items-center gap-3 px-3.5 py-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition">
                     <span class="text-base">🌐</span>
                     <span>Ver Vista de Cliente</span>

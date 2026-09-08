@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Cliente;
 
 use App\Http\Controllers\Controller;
+use App\Models\PromoCode;
+use App\Models\PromoCodeRedemption;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,116 +31,114 @@ class RewardController extends Controller
             if (!$user) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Sesión expirada. Por favor recarga e inicia sesión nuevamente.',
+                    'message' => 'Sesión expirada. Por favor inicia sesión nuevamente.',
                 ], 401);
             }
 
-            // Asegurar que las columnas existan en caso de base de datos remota desfasada
+            // Asegurar columna roulette_spins y last_spin_at de forma segura
             if (!Schema::hasColumn('users', 'roulette_spins')) {
                 Schema::table('users', function (Blueprint $table) {
-                    $table->unsignedInteger('roulette_spins')->default(1);
+                    $table->unsignedInteger('roulette_spins')->default(1)->after('status');
                 });
             }
             if (!Schema::hasColumn('users', 'last_spin_at')) {
                 Schema::table('users', function (Blueprint $table) {
-                    $table->timestamp('last_spin_at')->nullable();
+                    $table->timestamp('last_spin_at')->nullable()->after('status');
                 });
             }
 
-            // Recargar datos frescos del usuario
-            $user->refresh();
+            // Comprobar si tiene giros disponibles
+            $availableSpins = $user->roulette_spins ?? 0;
+            $canSpinByTime = true;
 
-            // Si el usuario nunca ha girado (usuario nuevo) y sus giros están en 0 o null, garantizar su giro gratis de bienvenida
-            if ($user->last_spin_at === null && ($user->roulette_spins === null || (int)$user->roulette_spins <= 0)) {
-                $user->roulette_spins = 1;
-                $user->save();
+            if ($user->last_spin_at) {
+                $hoursSinceLastSpin = now()->diffInHours($user->last_spin_at);
+                if ($hoursSinceLastSpin < 24 && $availableSpins <= 0) {
+                    $canSpinByTime = false;
+                    $remainingHours = 24 - $hoursSinceLastSpin;
+                    return response()->json([
+                        'success' => false,
+                        'message' => "⏳ Ya utilizaste tu giro diario. Podrás girar de nuevo en {$remainingHours} hora(s) o acumulando giros por recargas/compras.",
+                    ], 422);
+                }
             }
 
-            $spinsAvailable = (int) ($user->roulette_spins ?? 0);
-
-            if ($spinsAvailable <= 0) {
-                return response()->json([
-                    'success' => false,
-                    'message' => '⚠️ No tienes giros disponibles. ¡Invita amigos con tu link de referido o realiza una recarga para ganar más giros!',
-                    'spins_left' => 0,
-                ], 422);
-            }
-
-            // Segmentos de la ruleta con premios en COP
-            $segments = [
-                ['index' => 0, 'prize' => 1000,  'label' => '$1.000 COP',  'color' => '#10b981'],
-                ['index' => 1, 'prize' => 2000,  'label' => '$2.000 COP',  'color' => '#06b6d4'],
-                ['index' => 2, 'prize' => 5000,  'label' => '$5.000 COP',  'color' => '#f59e0b'],
-                ['index' => 3, 'prize' => 9000,  'label' => '$9.000 COP',  'color' => '#ec4899'],
-                ['index' => 4, 'prize' => 500,   'label' => '$500 COP',    'color' => '#8b5cf6'],
-                ['index' => 5, 'prize' => 13000, 'label' => '👑 $13.000',  'color' => '#ef4444'],
-                ['index' => 6, 'prize' => 3000,  'label' => '$3.000 COP',  'color' => '#14b8a6'],
-                ['index' => 7, 'prize' => 1000,  'label' => '$1.000 COP',  'color' => '#3b82f6'],
+            // Premios en pesos colombianos ($ COP) configurados con pesos probabilísticos
+            // 0: $1.000 (35%)
+            // 1: $2.000 (25%)
+            // 2: $5.000 (18%)
+            // 3: $10.000 (10%)
+            // 4: $20.000 (7%)
+            // 5: $50.000 (4%)
+            // 6: $100.000 (0.9%)
+            // 7: $200.000 (0.1%)
+            $prizes = [
+                0 => ['amount' => 1000, 'weight' => 350],
+                1 => ['amount' => 2000, 'weight' => 250],
+                2 => ['amount' => 5000, 'weight' => 180],
+                3 => ['amount' => 10000, 'weight' => 100],
+                4 => ['amount' => 20000, 'weight' => 70],
+                5 => ['amount' => 50000, 'weight' => 40],
+                6 => ['amount' => 100000, 'weight' => 9],
+                7 => ['amount' => 200000, 'weight' => 1],
             ];
 
-            // Ponderación de probabilidades balanceada y emocionante
-            $weights = [
-                0 => 25, // $1.000 COP
-                1 => 20, // $2.000 COP
-                2 => 10, // $5.000 COP
-                3 => 6,  // $9.000 COP
-                4 => 14, // $500 COP
-                5 => 3,  // 👑 $13.000 COP (Premio Mayor VIP)
-                6 => 12, // $3.000 COP
-                7 => 10, // $1.000 COP
-            ];
+            // Algoritmo de selección ponderada
+            $rand = mt_rand(1, 1000);
+            $currentWeight = 0;
+            $selectedSegment = 0;
 
-            $totalWeight = array_sum($weights);
-            $rand = mt_rand(1, $totalWeight);
-            $current = 0;
-            $chosenIndex = 0;
-            foreach ($weights as $index => $weight) {
-                $current += $weight;
-                if ($rand <= $current) {
-                    $chosenIndex = $index;
+            foreach ($prizes as $index => $prizeData) {
+                $currentWeight += $prizeData['weight'];
+                if ($rand <= $currentWeight) {
+                    $selectedSegment = $index;
                     break;
                 }
             }
 
-            $selected = $segments[$chosenIndex] ?? $segments[0];
+            $wonAmount = $prizes[$selectedSegment]['amount'];
 
-            $prize = $selected['prize'];
-
-            DB::transaction(function () use ($user, $prize, $spinsAvailable) {
-                $user->roulette_spins = max(0, $spinsAvailable - 1);
-                $user->balance += $prize;
+            // Ejecutar la acreditación en transacción segura
+            DB::transaction(function () use ($user, $wonAmount) {
+                // Descontar giro si tenía acumulados
+                if ($user->roulette_spins > 0) {
+                    $user->roulette_spins -= 1;
+                }
                 $user->last_spin_at = now();
+                $user->balance += $wonAmount;
                 $user->save();
 
+                // Registrar en transacciones
                 Transaction::create([
                     'user_id' => $user->id,
                     'type' => 'roulette_reward',
-                    'amount' => $prize,
+                    'amount' => $wonAmount,
                     'balance_after' => $user->balance,
-                    'description' => 'Premio de Ruleta de la Suerte (+' . number_format($prize, 0, ',', '.') . ' COP)',
+                    'description' => 'Premio Ruleta de la Suerte VIP (+$' . number_format($wonAmount, 0, ',', '.') . ' COP)',
                 ]);
             });
 
             return response()->json([
                 'success' => true,
-                'segment_index' => $selected['index'],
-                'prize' => $prize,
-                'prize_label' => $selected['label'],
-                'spins_left' => $user->roulette_spins,
+                'segment' => $selectedSegment,
+                'prize' => $wonAmount,
+                'message' => '¡Felicidades! Ganaste $' . number_format($wonAmount, 0, ',', '.') . ' COP acreditados a tu saldo.',
                 'new_balance' => $user->balance,
                 'new_balance_formatted' => '$' . number_format($user->balance, 0, ',', '.') . ' COP',
+                'remaining_spins' => $user->roulette_spins,
             ]);
+
         } catch (\Throwable $e) {
-            Log::error('Error al girar ruleta: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            Log::error('Error en Ruleta: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Ocurrió un error al procesar el giro: ' . $e->getMessage(),
+                'message' => 'Ocurrió un error al procesar tu giro. Intenta de nuevo.',
             ], 500);
         }
     }
 
     /**
-     * Abrir Sobre Rojo VIP o Canjear Código Promocional
+     * Abrir Sobre Rojo VIP o Canjear Código de Sorteo / Regalo
      */
     public function claimRedPacket(Request $request)
     {
@@ -165,54 +165,81 @@ class RewardController extends Controller
 
             $code = strtoupper(trim($request->input('code', '')));
 
-            // 1. Canje con código promocional exclusivo
+            // 1. Canje con código exclusivo creado por el Administrador
             if (!empty($code)) {
-                $validPromoCodes = [
-                    'VIP2026' => 5000,
-                    'BONO777' => 3000,
-                    'FORTEX' => 2500,
-                    'PLATA' => 2000,
-                    'NEQUI' => 1500,
-                ];
+                $promoCode = PromoCode::where('code', $code)->first();
 
-                if (!isset($validPromoCodes[$code])) {
+                if (!$promoCode) {
                     return response()->json([
                         'success' => false,
-                        'message' => '❌ El código promocional ingresado no es válido o ya caducó.',
+                        'message' => '❌ El código de regalo ingresado no existe o no es válido.',
                     ], 422);
                 }
 
-                // Validar si ya canjeó este código
-                $alreadyUsed = Transaction::where('user_id', $user->id)
-                    ->where('description', 'LIKE', "%Código Promocional [{$code}]%")
+                if (!$promoCode->status) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => '⏸️ Este código de regalo ha sido pausado por el administrador.',
+                    ], 422);
+                }
+
+                if ($promoCode->expires_at && $promoCode->expires_at->isPast()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => '⏰ Este código de regalo ha expirado.',
+                    ], 422);
+                }
+
+                if ($promoCode->max_uses > 0 && $promoCode->used_count >= $promoCode->max_uses) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => '❌ Este código ya alcanzó su límite máximo de ganadores y se encuentra agotado.',
+                    ], 422);
+                }
+
+                // Validar si el usuario ya canjeó este código
+                $alreadyRedeemed = PromoCodeRedemption::where('promo_code_id', $promoCode->id)
+                    ->where('user_id', $user->id)
                     ->exists();
 
-                if ($alreadyUsed) {
+                if ($alreadyRedeemed) {
                     return response()->json([
                         'success' => false,
-                        'message' => "⚠️ Ya canjeaste el código {$code} anteriormente.",
+                        'message' => "⚠️ Ya canjeaste el código [{$code}] anteriormente en tu cuenta.",
                     ], 422);
                 }
 
-                $prize = $validPromoCodes[$code];
+                $prize = (float) $promoCode->reward_amount;
 
-                DB::transaction(function () use ($user, $prize, $code) {
+                DB::transaction(function () use ($user, $promoCode, $prize, $code) {
+                    // Incrementar contador de usos
+                    $promoCode->increment('used_count');
+
+                    // Registrar canje
+                    PromoCodeRedemption::create([
+                        'promo_code_id' => $promoCode->id,
+                        'user_id' => $user->id,
+                        'reward_amount' => $prize,
+                    ]);
+
+                    // Acreditar saldo
                     $user->balance += $prize;
                     $user->save();
 
+                    // Registrar transacción
                     Transaction::create([
                         'user_id' => $user->id,
                         'type' => 'promo_code',
                         'amount' => $prize,
                         'balance_after' => $user->balance,
-                        'description' => "Bono de Código Promocional [{$code}] (+" . number_format($prize, 0, ',', '.') . " COP)",
+                        'description' => "Premio de Código de Sorteo [{$code}] (+" . number_format($prize, 0, ',', '.') . " COP)",
                     ]);
                 });
 
                 return response()->json([
                     'success' => true,
                     'prize' => $prize,
-                    'message' => "🎉 ¡Código {$code} canjeado con éxito! Recibes +$" . number_format($prize, 0, ',', '.') . " COP en tu saldo disponible.",
+                    'message' => "🎉 ¡Código [{$code}] canjeado con éxito! Recibes +$" . number_format($prize, 0, ',', '.') . " COP en tu saldo disponible.",
                     'new_balance' => $user->balance,
                     'new_balance_formatted' => '$' . number_format($user->balance, 0, ',', '.') . ' COP',
                 ]);
