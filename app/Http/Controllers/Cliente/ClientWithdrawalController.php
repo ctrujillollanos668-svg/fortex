@@ -75,13 +75,14 @@ class ClientWithdrawalController extends Controller
         $netAmount = $amount - $fee;
         $destination = $request->payment_method . ' - ' . $request->wallet_or_account;
 
-        DB::transaction(function () use ($user, $amount, $fee, $netAmount, $destination) {
+        $newWithdrawal = null;
+        DB::transaction(function () use ($user, $amount, $fee, $netAmount, $destination, &$newWithdrawal) {
             // 1. Descontar saldo del usuario
             $user->balance -= $amount;
             $user->save();
 
             // 2. Crear solicitud de retiro
-            Withdrawal::create([
+            $newWithdrawal = Withdrawal::create([
                 'user_id' => $user->id,
                 'amount' => $amount,
                 'fee' => $fee,
@@ -100,6 +101,11 @@ class ClientWithdrawalController extends Controller
                 'description' => 'Solicitud de retiro a ' . $destination . ' (Comisión 8%: $' . number_format($fee, 0, ',', '.') . ' COP)',
             ]);
         });
+
+        // Notificación instantánea al Administrador por Telegram
+        if ($newWithdrawal) {
+            \App\Services\TelegramService::notifyNewWithdrawal($newWithdrawal, $user);
+        }
 
         return redirect()->route('cliente.withdrawals.index')
             ->with('success', '¡Solicitud de retiro de $' . number_format($amount, 0, ',', '.') . ' COP enviada con éxito! Será transferida a tu cuenta en breve.');

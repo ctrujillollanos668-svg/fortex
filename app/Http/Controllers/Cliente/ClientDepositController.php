@@ -48,7 +48,7 @@ class ClientDepositController extends Controller
             $proofPath = 'uploads/proofs/' . $fileName;
         }
 
-        Deposit::create([
+        $deposit = Deposit::create([
             'user_id' => $user->id,
             'amount' => $request->amount,
             'payment_method' => $request->payment_method,
@@ -57,6 +57,10 @@ class ClientDepositController extends Controller
             'status' => 'pending',
             'admin_notes' => 'En espera de verificación por el Administrador.',
         ]);
+
+        // Notificación instantánea al Administrador por Telegram
+        $absoluteProof = $proofPath ? public_path($proofPath) : null;
+        \App\Services\TelegramService::notifyNewDeposit($deposit, $user, $absoluteProof);
 
         return redirect()->route('cliente.deposits.index')
             ->with('success', '¡Recarga de $' . number_format($request->amount, 0, ',', '.') . ' COP reportada con éxito! Por favor espera aproximadamente 10 minutos mientras verificamos tu comprobante para acreditar el saldo en tu cuenta.');
