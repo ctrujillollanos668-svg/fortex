@@ -37,10 +37,15 @@ RUN npm install && npm run build
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Script de arranque para enlazar el puerto dinámico de Render ($PORT)
+# Crear enlace simbólico de almacenamiento público
+RUN php artisan storage:link || true
+
+# Script de arranque para enlazar el puerto dinámico ($PORT) y preparar Laravel
 RUN echo '#!/bin/bash\n\
 sed -i "s/Listen 80/Listen ${PORT:-80}/g" /etc/apache2/ports.conf\n\
 sed -i "s/:80/:${PORT:-80}/g" /etc/apache2/sites-available/000-default.conf\n\
+php artisan storage:link --force\n\
+php artisan migrate --force || true\n\
 php artisan config:clear\n\
 php artisan route:clear\n\
 php artisan view:clear\n\
