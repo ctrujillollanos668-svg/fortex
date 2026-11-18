@@ -38,6 +38,12 @@ class RegisteredUserController extends Controller
             $request->merge(['referral_code' => trim($rawRef)]);
         }
 
+        // Limpiar número de celular (quitar espacios, guiones o caracteres extraños)
+        if ($request->filled('phone')) {
+            $cleanPhone = preg_replace('/[^0-9+]/', '', trim($request->phone));
+            $request->merge(['phone' => $cleanPhone]);
+        }
+
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => [
@@ -80,7 +86,7 @@ class RegisteredUserController extends Controller
                     }
                 },
             ],
-            'phone' => ['nullable', 'string', 'max:30'],
+            'phone' => ['required', 'string', 'min:7', 'max:25', 'unique:' . User::class],
             'referral_code' => ['nullable', 'string'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ], [
@@ -88,6 +94,9 @@ class RegisteredUserController extends Controller
             'email.required' => 'Por favor ingresa tu correo electrónico.',
             'email.email' => '⚠️ El correo electrónico ingresado no es válido o su dominio no existe en internet.',
             'email.unique' => 'Este correo electrónico ya se encuentra registrado.',
+            'phone.required' => 'El número de teléfono o celular es obligatorio.',
+            'phone.min' => 'El número de celular debe tener al menos 7 dígitos.',
+            'phone.unique' => '⚠️ Este número de teléfono ya se encuentra registrado. Por favor usa otro número o inicia sesión.',
             'password.required' => 'La contraseña es obligatoria.',
             'password.confirmed' => 'La confirmación de la contraseña no coincide.',
         ]);
