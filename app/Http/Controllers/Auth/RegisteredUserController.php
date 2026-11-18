@@ -44,7 +44,7 @@ class RegisteredUserController extends Controller
                 'required',
                 'string',
                 'lowercase',
-                'email:rfc,dns',
+                'email:rfc,filter',
                 'max:255',
                 'unique:' . User::class,
                 function ($attribute, $value, $fail) {
