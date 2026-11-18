@@ -38,13 +38,21 @@ class ClientDepositController extends Controller
 
         if ($request->hasFile('proof_image')) {
             $file = $request->file('proof_image');
-            $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $extension = $file->getClientOriginalExtension() ?: 'jpg';
+            $fileName = time() . '_' . uniqid() . '.' . $extension;
             
             $destinationPath = public_path('uploads/proofs');
             if (!file_exists($destinationPath)) {
-                mkdir($destinationPath, 0777, true);
+                @mkdir($destinationPath, 0777, true);
             }
-            $file->move($destinationPath, $fileName);
+
+            try {
+                $file->move($destinationPath, $fileName);
+            } catch (\Throwable $e) {
+                if ($file->getRealPath() && file_exists($file->getRealPath())) {
+                    @copy($file->getRealPath(), $destinationPath . DIRECTORY_SEPARATOR . $fileName);
+                }
+            }
             $proofPath = 'uploads/proofs/' . $fileName;
         }
 
@@ -58,9 +66,13 @@ class ClientDepositController extends Controller
             'admin_notes' => 'En espera de verificación por el Administrador.',
         ]);
 
-        // Notificación instantánea al Administrador por Telegram
-        $absoluteProof = $proofPath ? public_path($proofPath) : null;
-        \App\Services\TelegramService::notifyNewDeposit($deposit, $user, $absoluteProof);
+        // Notificación instantánea al Administrador por Telegram protegida
+        try {
+            $absoluteProof = ($proofPath && file_exists(public_path($proofPath))) ? public_path($proofPath) : null;
+            \App\Services\TelegramService::notifyNewDeposit($deposit, $user, $absoluteProof);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Telegram notification error: ' . $e->getMessage());
+        }
 
         return redirect()->route('cliente.deposits.index')
             ->with('success', '¡Recarga de $' . number_format($request->amount, 0, ',', '.') . ' COP reportada con éxito! Por favor espera aproximadamente 10 minutos mientras verificamos tu comprobante para acreditar el saldo en tu cuenta.');
@@ -76,16 +88,16 @@ class ClientDepositController extends Controller
         if ($pm && $pm->qr_image) {
             // 1. Probar en public/
             if (file_exists(public_path($pm->qr_image))) {
-                return response()->file(public_path($pm->qr_image));
+                return $this->deliverImage(public_path($pm->qr_image));
             }
             // 2. Probar en public/qrs/
             $basename = basename($pm->qr_image);
             if (file_exists(public_path('qrs/' . $basename))) {
-                return response()->file(public_path('qrs/' . $basename));
+                return $this->deliverImage(public_path('qrs/' . $basename));
             }
             // 3. Probar en storage/app/public/
             if (file_exists(storage_path('app/public/' . $pm->qr_image))) {
-                return response()->file(storage_path('app/public/' . $pm->qr_image));
+                return $this->deliverImage(storage_path('app/public/' . $pm->qr_image));
             }
         }
 
@@ -94,36 +106,48 @@ class ClientDepositController extends Controller
 
         if (str_contains($type, 'nequi')) {
             if (file_exists(public_path('qrs/qrnequi.png'))) {
-                return response()->file(public_path('qrs/qrnequi.png'));
+                return $this->deliverImage(public_path('qrs/qrnequi.png'));
             }
             if (file_exists(storage_path('app/public/qrs/qrnequi.png'))) {
-                return response()->file(storage_path('app/public/qrs/qrnequi.png'));
+                return $this->deliverImage(storage_path('app/public/qrs/qrnequi.png'));
             }
             if (file_exists(public_path('qrs/nequi.jpg'))) {
-                return response()->file(public_path('qrs/nequi.jpg'));
+                return $this->deliverImage(public_path('qrs/nequi.jpg'));
             }
         }
 
         if (str_contains($type, 'banco')) {
             if (file_exists(public_path('qrs/qrbancolombia.png'))) {
-                return response()->file(public_path('qrs/qrbancolombia.png'));
+                return $this->deliverImage(public_path('qrs/qrbancolombia.png'));
             }
             if (file_exists(storage_path('app/public/qrs/qrbancolombia.png'))) {
-                return response()->file(storage_path('app/public/qrs/qrbancolombia.png'));
+                return $this->deliverImage(storage_path('app/public/qrs/qrbancolombia.png'));
             }
             if (file_exists(public_path('qrs/bancolombia.jpg'))) {
-                return response()->file(public_path('qrs/bancolombia.jpg'));
+                return $this->deliverImage(public_path('qrs/bancolombia.jpg'));
             }
         }
 
         // Respaldo global
         if (file_exists(public_path('qrs/qrnequi.png'))) {
-            return response()->file(public_path('qrs/qrnequi.png'));
+            return $this->deliverImage(public_path('qrs/qrnequi.png'));
         }
         if (file_exists(public_path('qrs/nequi.jpg'))) {
-            return response()->file(public_path('qrs/nequi.jpg'));
+            return $this->deliverImage(public_path('qrs/nequi.jpg'));
         }
 
         abort(404, 'Código QR no disponible.');
+    }
+
+    /**
+     * Enviar imagen directamente sin depender de restricciones del sistema de archivos
+     */
+    protected function deliverImage(string $path)
+    {
+        $mime = str_ends_with(strtolower($path), '.png') ? 'image/png' : 'image/jpeg';
+        return response(file_get_contents($path), 200, [
+            'Content-Type' => $mime,
+            'Cache-Control' => 'public, max-age=86400',
+        ]);
     }
 }

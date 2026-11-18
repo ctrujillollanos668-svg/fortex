@@ -35,8 +35,9 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 RUN npm install && npm run build
 
 # Configurar permisos de almacenamiento y caché de Laravel
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+RUN mkdir -p /var/www/html/public/uploads/proofs /var/www/html/public/qrs \
+    && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/public/uploads /var/www/html/public/qrs \
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/public/uploads /var/www/html/public/qrs
 
 # Crear enlace simbólico de almacenamiento público
 RUN php artisan storage:link || true
@@ -45,6 +46,9 @@ RUN php artisan storage:link || true
 RUN echo '#!/bin/bash\n\
 sed -i "s/Listen 80/Listen ${PORT:-80}/g" /etc/apache2/ports.conf\n\
 sed -i "s/:80/:${PORT:-80}/g" /etc/apache2/sites-available/000-default.conf\n\
+mkdir -p /var/www/html/public/uploads/proofs /var/www/html/public/qrs\n\
+chown -R www-data:www-data /var/www/html/public/uploads /var/www/html/public/qrs\n\
+chmod -R 775 /var/www/html/public/uploads /var/www/html/public/qrs\n\
 php artisan storage:link --force\n\
 php artisan migrate --force || true\n\
 php artisan config:clear\n\

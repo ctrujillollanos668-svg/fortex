@@ -102,9 +102,13 @@ class ClientWithdrawalController extends Controller
             ]);
         });
 
-        // Notificación instantánea al Administrador por Telegram
+        // Notificación instantánea al Administrador por Telegram protegida
         if ($newWithdrawal) {
-            \App\Services\TelegramService::notifyNewWithdrawal($newWithdrawal, $user);
+            try {
+                \App\Services\TelegramService::notifyNewWithdrawal($newWithdrawal, $user);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Telegram withdrawal notification error: ' . $e->getMessage());
+            }
         }
 
         return redirect()->route('cliente.withdrawals.index')
