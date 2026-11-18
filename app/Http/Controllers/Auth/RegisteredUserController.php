@@ -40,13 +40,53 @@ class RegisteredUserController extends Controller
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'email' => [
+                'required',
+                'string',
+                'lowercase',
+                'email:rfc,dns',
+                'max:255',
+                'unique:' . User::class,
+                function ($attribute, $value, $fail) {
+                    $domain = strtolower(substr(strrchr($value, "@"), 1));
+
+                    // Lista de servicios de correos temporales / desechables bloqueados
+                    $disposableDomains = [
+                        'yopmail.com', 'yopmail.net', 'yopmail.fr', 'cool.fr.nf', 'jetable.fr.nf',
+                        'tempmail.com', 'temp-mail.org', 'tempmail.net', 'temp-mail.io',
+                        'guerrillamail.com', 'guerrillamail.net', 'guerrillamail.org', 'guerrillamailblock.com',
+                        'mailinator.com', 'mailinater.com', 'suremail.info', 'reconmail.com',
+                        '10minutemail.com', '10minutemail.net', '10minutemail.org', '10minmail.com',
+                        'sharklasers.com', 'dispostable.com', 'trashmail.com', 'trashmail.net',
+                        'getairmail.com', 'mohmal.com', 'crazymailing.com', 'fakemailgenerator.com',
+                        'generator.email', 'emailondeck.com', 'throwawaymail.com', 'tempail.com',
+                        'inboxbear.com', 'dropmail.me', 'mytemp.email', 'getnada.com', 'nada.ltd',
+                        'tempmailo.com', 'burnermail.io', 'inboxkitten.com', 'disposablemail.com',
+                        'mailpoof.com', 'fakeinbox.com', 'disposable.com', 'luxusmail.org',
+                        'zillamail.com', 'armyspy.com', 'cuvox.de', 'dayrep.com', 'einrot.com',
+                        'fleckens.hu', 'gustr.com', 'jourrapide.com', 'rhyta.com', 'superrito.com',
+                        'teleworm.us', 'disbox.org', 'trashmail.me'
+                    ];
+
+                    if (in_array($domain, $disposableDomains)) {
+                        $fail('⚠️ No se permiten correos electrónicos temporales o desechables. Por favor usa un correo personal real (Gmail, Outlook, Hotmail, etc.).');
+                        return;
+                    }
+
+                    // Verificar que el dominio tenga formato válido con TLD existente
+                    if (!str_contains($domain, '.') || strlen(substr(strrchr($domain, "."), 1)) < 2) {
+                        $fail('⚠️ El dominio del correo no es válido.');
+                        return;
+                    }
+                },
+            ],
             'phone' => ['nullable', 'string', 'max:30'],
             'referral_code' => ['nullable', 'string'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ], [
             'name.required' => 'Por favor ingresa tu nombre completo.',
             'email.required' => 'Por favor ingresa tu correo electrónico.',
+            'email.email' => '⚠️ El correo electrónico ingresado no es válido o su dominio no existe en internet.',
             'email.unique' => 'Este correo electrónico ya se encuentra registrado.',
             'password.required' => 'La contraseña es obligatoria.',
             'password.confirmed' => 'La confirmación de la contraseña no coincide.',
