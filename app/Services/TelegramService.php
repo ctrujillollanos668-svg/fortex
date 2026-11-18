@@ -80,10 +80,22 @@ class TelegramService
             . "💳 <b>Método:</b> {$methodFormatted}\n"
             . "🧾 <b>Referencia/Hash:</b> <code>{$hashFormatted}</code>\n"
             . "📅 <b>Fecha:</b> {$dateFormatted}\n\n"
-            . "⚡ <i>Revisa el comprobante y apruébalo desde el panel de administración.</i>";
+            . "⚡ <i>Toca un botón abajo para aprobar o rechazar inmediatamente:</i>";
+
+        $keyboard = json_encode([
+            'inline_keyboard' => [
+                [
+                    ['text' => "✅ Aprobar \${$amountFormatted} COP", 'callback_data' => "approve:{$deposit->id}:{$deposit->amount}"],
+                    ['text' => "❌ Rechazar", 'callback_data' => "reject:{$deposit->id}"],
+                ],
+                [
+                    ['text' => "🌐 Ver en Panel Web", 'url' => "https://fortex.wasmer.app/admin/deposits"]
+                ]
+            ]
+        ]);
 
         try {
-            // Si hay archivo de comprobante válido en el disco, enviarlo como foto con el caption
+            // Si hay archivo de comprobante válido en el disco, enviarlo como foto con el caption y botones
             if ($proofAbsolutePath && file_exists($proofAbsolutePath) && is_readable($proofAbsolutePath)) {
                 $fileContent = file_get_contents($proofAbsolutePath);
                 $fileName = basename($proofAbsolutePath);
@@ -94,6 +106,7 @@ class TelegramService
                         'chat_id' => $chatId,
                         'caption' => $caption,
                         'parse_mode' => 'HTML',
+                        'reply_markup' => $keyboard,
                     ]);
 
                 if ($response->successful()) {
@@ -101,13 +114,168 @@ class TelegramService
                 }
             }
 
-            // Si no hay foto o falló el envío de foto, enviar como mensaje de texto
-            return self::sendMessage($caption);
+            // Fallback: enviar como texto con botones
+            $response = Http::timeout(8)->asForm()->post("https://api.telegram.org/bot{$token}/sendMessage", [
+                'chat_id' => $chatId,
+                'text' => $caption,
+                'parse_mode' => 'HTML',
+                'reply_markup' => $keyboard,
+            ]);
+
+            return $response->successful();
         } catch (\Throwable $e) {
             Log::error('TelegramService notifyNewDeposit Error: ' . $e->getMessage());
-            // Fallback de texto seguro
             return self::sendMessage($caption);
         }
+    }
+
+    /**
+     * Notificar comprobante recibido por WhatsApp con selección de montos rápidos
+     */
+    public static function notifyWhatsAppReceipt($deposit, $user, ?string $proofAbsolutePath = null, ?float $suggestedAmount = null): bool
+    {
+        $token = self::getBotToken();
+        $chatId = self::getChatId();
+
+        if (empty($token) || empty($chatId)) {
+            return false;
+        }
+
+        $appName = config('app.name', 'FORTEX');
+        $phoneFormatted = $user->phone ? $user->phone : 'Sin teléfono';
+        $emailFormatted = $user->email;
+        $dateFormatted = now()->setTimezone('America/Bogota')->format('d/m/Y - h:i A');
+
+        $caption = "📱 <b>¡COMPROBANTE RECIBIDO POR WHATSAPP!</b> 📱\n\n"
+            . "👤 <b>Cliente:</b> {$user->name}\n"
+            . "📱 <b>WhatsApp:</b> <code>{$phoneFormatted}</code>\n"
+            . "📧 <b>Email:</b> {$emailFormatted}\n"
+            . "📅 <b>Fecha:</b> {$dateFormatted}\n\n"
+            . "⚡ <i>Revisa la imagen y toca el monto exacto para acreditar al cliente:</i>";
+
+        $keyboardButtons = [];
+
+        // Si hay monto sugerido detectado, colocarlo primero
+        if ($suggestedAmount && $suggestedAmount >= 10000) {
+            $sugFmt = number_format($suggestedAmount, 0, ',', '.');
+            $keyboardButtons[] = [
+                ['text' => "🌟 Aprobar \${$sugFmt} COP", 'callback_data' => "approve:{$deposit->id}:{$suggestedAmount}"]
+            ];
+        }
+
+        $keyboardButtons[] = [
+            ['text' => '✅ $10.000', 'callback_data' => "approve:{$deposit->id}:10000"],
+            ['text' => '✅ $20.000', 'callback_data' => "approve:{$deposit->id}:20000"],
+            ['text' => '✅ $30.000', 'callback_data' => "approve:{$deposit->id}:30000"],
+        ];
+        $keyboardButtons[] = [
+            ['text' => '✅ $50.000', 'callback_data' => "approve:{$deposit->id}:50000"],
+            ['text' => '✅ $100.000', 'callback_data' => "approve:{$deposit->id}:100000"],
+            ['text' => '✅ $200.000', 'callback_data' => "approve:{$deposit->id}:200000"],
+        ];
+        $keyboardButtons[] = [
+            ['text' => '❌ Rechazar Comprobante', 'callback_data' => "reject:{$deposit->id}"]
+        ];
+
+        $keyboard = json_encode(['inline_keyboard' => $keyboardButtons]);
+
+        try {
+            if ($proofAbsolutePath && file_exists($proofAbsolutePath) && is_readable($proofAbsolutePath)) {
+                $fileContent = file_get_contents($proofAbsolutePath);
+                $fileName = basename($proofAbsolutePath);
+
+                $response = Http::timeout(15)
+                    ->attach('photo', $fileContent, $fileName)
+                    ->post("https://api.telegram.org/bot{$token}/sendPhoto", [
+                        'chat_id' => $chatId,
+                        'caption' => $caption,
+                        'parse_mode' => 'HTML',
+                        'reply_markup' => $keyboard,
+                    ]);
+
+                if ($response->successful()) {
+                    return true;
+                }
+            }
+
+            return self::sendMessage($caption);
+        } catch (\Throwable $e) {
+            Log::error('TelegramService notifyWhatsAppReceipt Error: ' . $e->getMessage());
+            return self::sendMessage($caption);
+        }
+    }
+
+    /**
+     * Responder a un clic de botón en Telegram (elimina el icono de reloj)
+     */
+    public static function answerCallbackQuery(string $callbackQueryId, ?string $text = null, bool $showAlert = false): bool
+    {
+        $token = self::getBotToken();
+        try {
+            $response = Http::timeout(5)->asForm()->post("https://api.telegram.org/bot{$token}/answerCallbackQuery", [
+                'callback_query_id' => $callbackQueryId,
+                'text' => $text,
+                'show_alert' => $showAlert,
+            ]);
+            return $response->successful();
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Editar el pie de foto de un mensaje en Telegram
+     */
+    public static function editMessageCaption(string|int $chatId, int $messageId, string $newCaption, ?array $replyMarkup = null): bool
+    {
+        $token = self::getBotToken();
+        try {
+            $data = [
+                'chat_id' => $chatId,
+                'message_id' => $messageId,
+                'caption' => $newCaption,
+                'parse_mode' => 'HTML',
+            ];
+            if ($replyMarkup !== null) {
+                $data['reply_markup'] = json_encode($replyMarkup);
+            }
+            $response = Http::timeout(6)->asForm()->post("https://api.telegram.org/bot{$token}/editMessageCaption", $data);
+            return $response->successful();
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Enviar mensaje automático al WhatsApp del cliente vía WAHA
+     */
+    public static function sendWhatsAppMessage(string $phone, string $text): bool
+    {
+        $wahaUrl = env('WAHA_API_URL', 'https://waha-bot-yo25.onrender.com');
+        $wahaKey = env('WAHA_API_KEY', '34ec073c9c6e45738171e5fbd14a7498');
+
+        $cleanPhone = preg_replace('/[^0-9]/', '', $phone);
+        if (!str_starts_with($cleanPhone, '57') && strlen($cleanPhone) === 10) {
+            $cleanPhone = '57' . $cleanPhone;
+        }
+        $chatId = $cleanPhone . '@c.us';
+
+        try {
+            $response = Http::timeout(15)->withHeaders([
+                'X-Api-Key' => $wahaKey,
+                'Content-Type' => 'application/json',
+            ])->post("{$wahaUrl}/api/sendText", [
+                'session' => 'default',
+                'chatId' => $chatId,
+                'text' => $text,
+            ]);
+
+            return $response->successful();
+        } catch (\Throwable $e) {
+            Log::error('Error enviando WhatsApp vía WAHA: ' . $e->getMessage());
+            return false;
+        }
+    }
     }
 
     /**
