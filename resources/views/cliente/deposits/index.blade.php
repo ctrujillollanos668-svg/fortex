@@ -56,7 +56,7 @@
 
                     <!-- Código QR Centrado -->
                     <div onclick="showQrModal('QR {{ $pm->name }}', '{{ route('payment-methods.qr', $pm->id) }}', '{{ $pm->account_holder ?? $pm->name }}')" class="bg-white p-3 rounded-2xl inline-block shadow-lg cursor-pointer hover:scale-105 transition-transform my-2 border border-slate-700">
-                        <img src="{{ route('payment-methods.qr', $pm->id) }}" alt="QR {{ $pm->name }}" class="w-28 h-28 object-contain" onerror="this.onerror=null; this.src='{{ asset('qrs/' . (str_contains(strtolower($pm->type), 'banco') ? 'bancolombia.jpg' : 'nequi.jpg')) }}';">
+                        <img src="{{ route('payment-methods.qr', $pm->id) }}" alt="QR {{ $pm->name }}" class="w-28 h-28 object-contain" onerror="this.onerror=null; this.src='{{ asset('qrs/' . (str_contains(strtolower($pm->type), 'banco') ? 'qrbancolombia.png' : 'qrnequi.png')) }}';">
                     </div>
 
                     @if($pm->account_holder)
@@ -210,7 +210,7 @@
 
         const container = document.getElementById('qrImageContainer');
         if (qrUrl && qrUrl.trim() !== '') {
-            const fallbackSrc = title.toLowerCase().includes('banco') ? '{{ asset('qrs/bancolombia.jpg') }}' : '{{ asset('qrs/nequi.jpg') }}';
+            const fallbackSrc = title.toLowerCase().includes('banco') ? '{{ asset('qrs/qrbancolombia.png') }}' : '{{ asset('qrs/qrnequi.png') }}';
             container.innerHTML = `<img src="${qrUrl}" alt="${title}" class="w-full h-full object-contain" onerror="this.onerror=null; this.src='${fallbackSrc}';">`;
         } else {
             container.innerHTML = `<div class="text-center p-4 text-slate-700 font-bold text-xs"><span class="text-4xl block mb-2">📸</span>Escanea el QR oficial desde tu app</div>`;

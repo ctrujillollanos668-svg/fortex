@@ -93,24 +93,33 @@ class ClientDepositController extends Controller
         $type = $pm ? strtolower($pm->type . ' ' . $pm->name) : '';
 
         if (str_contains($type, 'nequi')) {
+            if (file_exists(public_path('qrs/qrnequi.png'))) {
+                return response()->file(public_path('qrs/qrnequi.png'));
+            }
+            if (file_exists(storage_path('app/public/qrs/qrnequi.png'))) {
+                return response()->file(storage_path('app/public/qrs/qrnequi.png'));
+            }
             if (file_exists(public_path('qrs/nequi.jpg'))) {
                 return response()->file(public_path('qrs/nequi.jpg'));
-            }
-            if (file_exists(public_path('qrs/1p8cmE5IEHJTHR1U4UGuSVQSgFLloOG63Vtdptas.jpg'))) {
-                return response()->file(public_path('qrs/1p8cmE5IEHJTHR1U4UGuSVQSgFLloOG63Vtdptas.jpg'));
             }
         }
 
         if (str_contains($type, 'banco')) {
+            if (file_exists(public_path('qrs/qrbancolombia.png'))) {
+                return response()->file(public_path('qrs/qrbancolombia.png'));
+            }
+            if (file_exists(storage_path('app/public/qrs/qrbancolombia.png'))) {
+                return response()->file(storage_path('app/public/qrs/qrbancolombia.png'));
+            }
             if (file_exists(public_path('qrs/bancolombia.jpg'))) {
                 return response()->file(public_path('qrs/bancolombia.jpg'));
-            }
-            if (file_exists(public_path('qrs/xJbKknd3TNGdrYlIJiDRI6CmHjYd3z01AELSOSMY.jpg'))) {
-                return response()->file(public_path('qrs/xJbKknd3TNGdrYlIJiDRI6CmHjYd3z01AELSOSMY.jpg'));
             }
         }
 
         // Respaldo global
+        if (file_exists(public_path('qrs/qrnequi.png'))) {
+            return response()->file(public_path('qrs/qrnequi.png'));
+        }
         if (file_exists(public_path('qrs/nequi.jpg'))) {
             return response()->file(public_path('qrs/nequi.jpg'));
         }

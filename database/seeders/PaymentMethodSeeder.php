@@ -56,15 +56,15 @@ class PaymentMethodSeeder extends Seeder
             ]);
         }
 
-        // Si ya existen pero no tienen QR asignado, asegurar las imágenes
-        $nequi = PaymentMethod::where('type', 'nequi')->first();
-        if ($nequi && empty($nequi->qr_image)) {
-            $nequi->update(['qr_image' => 'qrs/1p8cmE5IEHJTHR1U4UGuSVQSgFLloOG63Vtdptas.jpg']);
+        // Actualizar métodos de pago Nequi y Bancolombia con los nuevos códigos QR
+        $nequi = PaymentMethod::where('type', 'nequi')->orWhere('name', 'like', '%nequi%')->first();
+        if ($nequi) {
+            $nequi->update(['qr_image' => 'qrs/qrnequi.png']);
         }
 
-        $bancolombia = PaymentMethod::where('type', 'bancolombia')->first();
-        if ($bancolombia && empty($bancolombia->qr_image)) {
-            $bancolombia->update(['qr_image' => 'qrs/xJbKknd3TNGdrYlIJiDRI6CmHjYd3z01AELSOSMY.jpg']);
+        $bancolombia = PaymentMethod::where('type', 'bancolombia')->orWhere('name', 'like', '%banco%')->first();
+        if ($bancolombia) {
+            $bancolombia->update(['qr_image' => 'qrs/qrbancolombia.png']);
         }
     }
 }
