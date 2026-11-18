@@ -55,15 +55,8 @@
                     </div>
 
                     <!-- Código QR Centrado -->
-                    <div onclick="showQrModal('QR {{ $pm->name }}', '{{ $pm->qr_image ? asset('storage/' . $pm->qr_image) : '' }}', '{{ $pm->account_holder ?? $pm->name }}')" class="bg-white p-3 rounded-2xl inline-block shadow-lg cursor-pointer hover:scale-105 transition-transform my-2 border border-slate-700">
-                        @if($pm->qr_image)
-                            <img src="{{ asset('storage/' . $pm->qr_image) }}" alt="QR {{ $pm->name }}" class="w-28 h-28 object-contain">
-                        @else
-                            <div class="w-28 h-28 flex flex-col items-center justify-center text-slate-800">
-                                <span class="text-3xl mb-1">📱</span>
-                                <span class="text-[10px] font-bold">QR Oficial</span>
-                            </div>
-                        @endif
+                    <div onclick="showQrModal('QR {{ $pm->name }}', '{{ route('payment-methods.qr', $pm->id) }}', '{{ $pm->account_holder ?? $pm->name }}')" class="bg-white p-3 rounded-2xl inline-block shadow-lg cursor-pointer hover:scale-105 transition-transform my-2 border border-slate-700">
+                        <img src="{{ route('payment-methods.qr', $pm->id) }}" alt="QR {{ $pm->name }}" class="w-28 h-28 object-contain" onerror="this.onerror=null; this.src='{{ asset('qrs/' . (str_contains(strtolower($pm->type), 'banco') ? 'bancolombia.jpg' : 'nequi.jpg')) }}';">
                     </div>
 
                     @if($pm->account_holder)
@@ -75,7 +68,7 @@
                 </div>
 
                 <!-- Botón para ver y escanear QR grande -->
-                <button type="button" onclick="showQrModal('QR {{ $pm->name }}', '{{ $pm->qr_image ? asset('storage/' . $pm->qr_image) : '' }}', '{{ $pm->account_holder ?? $pm->name }}')" class="mt-4 w-full py-2.5 {{ $colorTheme['btn'] }} border font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition cursor-pointer">
+                <button type="button" onclick="showQrModal('QR {{ $pm->name }}', '{{ route('payment-methods.qr', $pm->id) }}', '{{ $pm->account_holder ?? $pm->name }}')" class="mt-4 w-full py-2.5 {{ $colorTheme['btn'] }} border font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition cursor-pointer">
                     <span>📸</span> Escanear Código QR
                 </button>
             </div>
@@ -217,7 +210,8 @@
 
         const container = document.getElementById('qrImageContainer');
         if (qrUrl && qrUrl.trim() !== '') {
-            container.innerHTML = `<img src="${qrUrl}" alt="${title}" class="w-full h-full object-contain">`;
+            const fallbackSrc = title.toLowerCase().includes('banco') ? '{{ asset('qrs/bancolombia.jpg') }}' : '{{ asset('qrs/nequi.jpg') }}';
+            container.innerHTML = `<img src="${qrUrl}" alt="${title}" class="w-full h-full object-contain" onerror="this.onerror=null; this.src='${fallbackSrc}';">`;
         } else {
             container.innerHTML = `<div class="text-center p-4 text-slate-700 font-bold text-xs"><span class="text-4xl block mb-2">📸</span>Escanea el QR oficial desde tu app</div>`;
         }

@@ -35,6 +35,7 @@ Route::middleware(['auth'])->group(function () {
     // Recargas / Depósitos
     Route::get('/deposit', [ClientDepositController::class, 'index'])->name('cliente.deposits.index');
     Route::post('/deposit', [ClientDepositController::class, 'store'])->name('cliente.deposits.store');
+    Route::get('/payment-methods/{id}/qr', [ClientDepositController::class, 'showQr'])->name('payment-methods.qr');
 
     // Retiros
     Route::get('/withdraw', [ClientWithdrawalController::class, 'index'])->name('cliente.withdrawals.index');

@@ -65,4 +65,56 @@ class ClientDepositController extends Controller
         return redirect()->route('cliente.deposits.index')
             ->with('success', '¡Recarga de $' . number_format($request->amount, 0, ',', '.') . ' COP reportada con éxito! Por favor espera aproximadamente 10 minutos mientras verificamos tu comprobante para acreditar el saldo en tu cuenta.');
     }
+
+    /**
+     * Servir la imagen del código QR de un método de pago con soporte de respaldos
+     */
+    public function showQr($id)
+    {
+        $pm = \App\Models\PaymentMethod::find($id);
+
+        if ($pm && $pm->qr_image) {
+            // 1. Probar en public/
+            if (file_exists(public_path($pm->qr_image))) {
+                return response()->file(public_path($pm->qr_image));
+            }
+            // 2. Probar en public/qrs/
+            $basename = basename($pm->qr_image);
+            if (file_exists(public_path('qrs/' . $basename))) {
+                return response()->file(public_path('qrs/' . $basename));
+            }
+            // 3. Probar en storage/app/public/
+            if (file_exists(storage_path('app/public/' . $pm->qr_image))) {
+                return response()->file(storage_path('app/public/' . $pm->qr_image));
+            }
+        }
+
+        // Si no se encontró por ruta específica, respaldar según tipo o nombre
+        $type = $pm ? strtolower($pm->type . ' ' . $pm->name) : '';
+
+        if (str_contains($type, 'nequi')) {
+            if (file_exists(public_path('qrs/nequi.jpg'))) {
+                return response()->file(public_path('qrs/nequi.jpg'));
+            }
+            if (file_exists(public_path('qrs/1p8cmE5IEHJTHR1U4UGuSVQSgFLloOG63Vtdptas.jpg'))) {
+                return response()->file(public_path('qrs/1p8cmE5IEHJTHR1U4UGuSVQSgFLloOG63Vtdptas.jpg'));
+            }
+        }
+
+        if (str_contains($type, 'banco')) {
+            if (file_exists(public_path('qrs/bancolombia.jpg'))) {
+                return response()->file(public_path('qrs/bancolombia.jpg'));
+            }
+            if (file_exists(public_path('qrs/xJbKknd3TNGdrYlIJiDRI6CmHjYd3z01AELSOSMY.jpg'))) {
+                return response()->file(public_path('qrs/xJbKknd3TNGdrYlIJiDRI6CmHjYd3z01AELSOSMY.jpg'));
+            }
+        }
+
+        // Respaldo global
+        if (file_exists(public_path('qrs/nequi.jpg'))) {
+            return response()->file(public_path('qrs/nequi.jpg'));
+        }
+
+        abort(404, 'Código QR no disponible.');
+    }
 }
