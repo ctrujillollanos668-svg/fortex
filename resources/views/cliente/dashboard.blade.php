@@ -675,12 +675,21 @@
 
             // Cada segmento mide 45 grados (360 / 8)
             const segmentDegrees = 45;
-            const targetSegment = data.segment_index;
+            const targetSegment = (data.segment_index !== undefined) ? parseInt(data.segment_index) : (parseInt(data.segment) || 0);
+            const prizeLabel = data.prize_label || ('$' + Number(data.prize || 0).toLocaleString('es-CO') + ' COP');
+            const spinsRemaining = (data.spins_left !== undefined) ? parseInt(data.spins_left) : ((data.remaining_spins !== undefined) ? parseInt(data.remaining_spins) : 0);
             
-            // Calculamos 5 vueltas completas + el ángulo exacto hacia el puntero superior
-            const extraRounds = 360 * 5;
+            // Calculamos ángulo hacia el puntero superior (12 o'clock / 360°)
             const targetAngle = 360 - (targetSegment * segmentDegrees) - (segmentDegrees / 2);
-            currentRotation += extraRounds + targetAngle;
+            
+            // Aseguramos al menos 5 vueltas completas y giro continuo preciso
+            const currentModulo = currentRotation % 360;
+            let degreesToTarget = targetAngle - currentModulo;
+            if (degreesToTarget <= 0) {
+                degreesToTarget += 360;
+            }
+            const extraRounds = 360 * 5;
+            currentRotation += extraRounds + degreesToTarget;
 
             wheel.style.transform = `rotate(${currentRotation}deg)`;
 
@@ -689,7 +698,6 @@
                 hasSpunInSession = true;
 
                 // Actualizar contadores de giros disponibles en vivo dentro del modal
-                const spinsRemaining = data.spins_left ?? 0;
                 const spinsBadge = document.getElementById('spinsLeftBadge');
                 const centerLabel = document.getElementById('spinCenterLabel');
                 if (spinsBadge) spinsBadge.innerText = spinsRemaining;
@@ -697,25 +705,25 @@
 
                 // Actualizar saldo del usuario en tiempo real en la interfaz
                 document.querySelectorAll('.user-balance-display').forEach(el => {
-                    el.innerText = data.new_balance_formatted;
+                    el.innerText = data.new_balance_formatted || ('$' + Number(data.new_balance || 0).toLocaleString('es-CO') + ' COP');
                 });
 
                 // Estado del botón central de la ruleta según los giros que le queden
                 if (spinsRemaining > 0) {
                     spinBtn.disabled = false;
                     spinBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                    statusMsg.innerText = `🎉 ¡Ganaste ${data.prize_label}! Te quedan ${spinsRemaining} giro${spinsRemaining > 1 ? 's' : ''}. ¡Presiona GIRAR para continuar!`;
+                    statusMsg.innerText = `🎉 ¡Ganaste ${prizeLabel}! Te quedan ${spinsRemaining} giro${spinsRemaining > 1 ? 's' : ''}. ¡Presiona GIRAR para continuar!`;
                 } else {
                     spinBtn.disabled = true;
                     spinBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                    statusMsg.innerText = `🎉 ¡Ganaste ${data.prize_label}! Ya no te quedan más giros. ¡Invita amigos para ganar más!`;
+                    statusMsg.innerText = `🎉 ¡Ganaste ${prizeLabel}! Ya no te quedan más giros. ¡Invita amigos para ganar más!`;
                 }
 
                 // Alerta de felicitación que NO cierra la ruleta
                 Swal.fire({
                     icon: 'success',
                     title: '¡Felicidades!',
-                    html: `Has ganado <b class="text-amber-400 text-lg font-mono">+${data.prize_label}</b><br><br>` +
+                    html: `Has ganado <b class="text-amber-400 text-lg font-mono">+${prizeLabel}</b><br><br>` +
                           `El dinero ya fue acreditado a tu balance disponible.<br>` +
                           (spinsRemaining > 0 
                             ? `<span class="text-emerald-400 font-bold block mt-2 text-xs">🎟️ ¡Aún tienes ${spinsRemaining} oportunidad${spinsRemaining > 1 ? 'es' : ''} más!</span>` 

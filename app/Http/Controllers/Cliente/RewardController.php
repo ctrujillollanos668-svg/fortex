@@ -58,24 +58,24 @@ class RewardController extends Controller
                 ], 422);
             }
 
-            // Premios en pesos colombianos ($ COP) configurados con pesos probabilísticos
-            // 0: $1.000 (35%)
-            // 1: $2.000 (25%)
-            // 2: $5.000 (18%)
-            // 3: $10.000 (10%)
-            // 4: $20.000 (7%)
-            // 5: $50.000 (4%)
-            // 6: $100.000 (0.9%)
-            // 7: $200.000 (0.1%)
+            // Premios en pesos colombianos ($ COP) perfectamente sincronizados con la ruleta visual:
+            // 0: $1.000 (25%)
+            // 1: $2.000 (22%)
+            // 2: $5.000 (10%)
+            // 3: $9.000 (3%)
+            // 4: $500 (20%)
+            // 5: 👑 $13.000 (1% - Premio Mayor)
+            // 6: $3.000 (7%)
+            // 7: $1.000 (12%)
             $prizes = [
-                0 => ['amount' => 1000, 'weight' => 350],
-                1 => ['amount' => 2000, 'weight' => 250],
-                2 => ['amount' => 5000, 'weight' => 180],
-                3 => ['amount' => 10000, 'weight' => 100],
-                4 => ['amount' => 20000, 'weight' => 70],
-                5 => ['amount' => 50000, 'weight' => 40],
-                6 => ['amount' => 100000, 'weight' => 9],
-                7 => ['amount' => 200000, 'weight' => 1],
+                0 => ['amount' => 1000,  'weight' => 250],
+                1 => ['amount' => 2000,  'weight' => 220],
+                2 => ['amount' => 5000,  'weight' => 100],
+                3 => ['amount' => 9000,  'weight' => 30],
+                4 => ['amount' => 500,   'weight' => 200],
+                5 => ['amount' => 13000, 'weight' => 10], // 👑 Premio Mayor VIP
+                6 => ['amount' => 3000,  'weight' => 70],
+                7 => ['amount' => 1000,  'weight' => 120],
             ];
 
             // Algoritmo de selección ponderada
@@ -113,14 +113,19 @@ class RewardController extends Controller
                 ]);
             });
 
+            $prizeLabel = '$' . number_format($wonAmount, 0, ',', '.') . ' COP';
+
             return response()->json([
                 'success' => true,
                 'segment' => $selectedSegment,
+                'segment_index' => $selectedSegment,
                 'prize' => $wonAmount,
-                'message' => '¡Felicidades! Ganaste $' . number_format($wonAmount, 0, ',', '.') . ' COP acreditados a tu saldo.',
+                'prize_label' => $prizeLabel,
+                'message' => '¡Felicidades! Ganaste ' . $prizeLabel . ' acreditados a tu saldo.',
                 'new_balance' => $user->balance,
                 'new_balance_formatted' => '$' . number_format($user->balance, 0, ',', '.') . ' COP',
                 'remaining_spins' => $user->roulette_spins,
+                'spins_left' => $user->roulette_spins,
             ]);
 
         } catch (\Throwable $e) {
