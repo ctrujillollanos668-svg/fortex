@@ -37,6 +37,30 @@ class TelegramWebhookController extends Controller
                     return response()->json(['status' => 'unauthorized'], 403);
                 }
 
+                // Si es comando /limpiar
+                if (strtolower($textMsg) === '/limpiar' || strtolower($textMsg) === 'limpiar') {
+                    Deposit::query()->delete();
+                    Transaction::whereIn('type', ['deposit', 'deposit_spins', 'referral_spins', 'referral_commission'])->delete();
+                    User::where('phone', '3117944193')
+                        ->orWhere('email', 'like', '%cristian%')
+                        ->update([
+                            'balance' => 0.00,
+                            'roulette_spins' => 0,
+                        ]);
+
+                    $files = glob(public_path('uploads/proofs/wa_proof_*'));
+                    if ($files) {
+                        foreach ($files as $file) {
+                            if (is_file($file)) {
+                                @unlink($file);
+                            }
+                        }
+                    }
+
+                    TelegramService::sendMessage("🧹 <b>¡Limpieza Completada!</b>\n\nTodos los comprobantes de prueba han sido eliminados de la base de datos y los saldos de prueba reseteados a $0 COP. El panel está 100% limpio y listo para clientes reales.");
+                    return response()->json(['status' => 'cleaned']);
+                }
+
                 // 1. Verificar si el usuario respondió (reply_to_message) a una foto específica
                 $reply = $data['message']['reply_to_message'] ?? null;
                 $targetDeposit = null;
