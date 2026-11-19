@@ -110,31 +110,59 @@ class ClientPlanController extends Controller
                 'description' => $txDesc,
             ]);
 
-            // 5. Pagar comisión del 10% al patrocinador (Nivel 1)
+            // 5. Pagar comisión del 10% al patrocinador directo (Nivel 1)
             if ($user->referred_by) {
-                $sponsor = $user->sponsor;
-                if ($sponsor) {
-                    $commissionAmount = $plan->price * 0.10; // 10% directo
+                $sponsorL1 = $user->sponsor;
+                if ($sponsorL1) {
+                    $commissionL1 = $plan->price * 0.10; // 10% directo
 
-                    $sponsor->balance += $commissionAmount;
-                    $sponsor->save();
+                    $sponsorL1->balance += $commissionL1;
+                    $sponsorL1->save();
 
                     ReferralCommission::create([
-                        'sponsor_id' => $sponsor->id,
+                        'sponsor_id' => $sponsorL1->id,
                         'downline_id' => $user->id,
                         'level' => 1,
-                        'amount' => $commissionAmount,
+                        'amount' => $commissionL1,
                         'percentage' => 10.00,
-                        'description' => 'Comisión Nivel 1 por compra de ' . $plan->name . ' de ' . $user->name,
+                        'description' => 'Comisión Nivel 1 (10%) por compra de ' . $plan->name . ' de ' . $user->name,
                     ]);
 
                     Transaction::create([
-                        'user_id' => $sponsor->id,
+                        'user_id' => $sponsorL1->id,
                         'type' => 'referral_commission',
-                        'amount' => $commissionAmount,
-                        'balance_after' => $sponsor->balance,
+                        'amount' => $commissionL1,
+                        'balance_after' => $sponsorL1->balance,
                         'description' => 'Comisión de Referido Nivel 1 (10%) por ' . $user->name,
                     ]);
+
+                    // 6. Pagar comisión del 2% al patrocinador de segundo nivel (Nivel 2)
+                    if ($sponsorL1->referred_by) {
+                        $sponsorL2 = $sponsorL1->sponsor;
+                        if ($sponsorL2) {
+                            $commissionL2 = $plan->price * 0.02; // 2% indirecto
+
+                            $sponsorL2->balance += $commissionL2;
+                            $sponsorL2->save();
+
+                            ReferralCommission::create([
+                                'sponsor_id' => $sponsorL2->id,
+                                'downline_id' => $user->id,
+                                'level' => 2,
+                                'amount' => $commissionL2,
+                                'percentage' => 2.00,
+                                'description' => 'Comisión Nivel 2 (2%) por compra de ' . $plan->name . ' de ' . $user->name . ' (Equipo de ' . $sponsorL1->name . ')',
+                            ]);
+
+                            Transaction::create([
+                                'user_id' => $sponsorL2->id,
+                                'type' => 'referral_commission',
+                                'amount' => $commissionL2,
+                                'balance_after' => $sponsorL2->balance,
+                                'description' => 'Comisión de Referido Nivel 2 (2%) por ' . $user->name,
+                            ]);
+                        }
+                    }
                 }
             }
         });

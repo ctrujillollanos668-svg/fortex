@@ -61,7 +61,7 @@
 
             <!-- Nivel 2 -->
             <div class="bg-slate-950/80 border border-cyan-500/30 rounded-2xl p-2.5 sm:p-4 text-center">
-                <span class="px-1.5 sm:px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 text-[9px] sm:text-[10px] font-extrabold uppercase truncate block">Nivel 2 (5%)</span>
+                <span class="px-1.5 sm:px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 text-[9px] sm:text-[10px] font-extrabold uppercase truncate block">Nivel 2 (2%)</span>
                 <h4 class="text-lg sm:text-2xl font-black text-white mt-1.5 sm:mt-2 font-mono">{{ $level2Referrals->count() }}</h4>
                 <p class="text-[9px] sm:text-[11px] text-slate-400 truncate mt-0.5">De tu Red</p>
             </div>
