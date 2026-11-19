@@ -110,6 +110,15 @@ class TelegramService
                     ]);
 
                 if ($response->successful()) {
+                    $resJson = $response->json();
+                    $msgId = $resJson['result']['message_id'] ?? null;
+                    if ($msgId && $deposit) {
+                        try {
+                            $deposit->update([
+                                'admin_notes' => trim(($deposit->admin_notes ?: '') . " [TG:{$msgId}]")
+                            ]);
+                        } catch (\Throwable $e) {}
+                    }
                     return true;
                 }
             }
@@ -146,13 +155,14 @@ class TelegramService
         $emailFormatted = $user->email;
         $dateFormatted = now()->setTimezone('America/Bogota')->format('d/m/Y - h:i A');
 
-        $caption = "📱 <b>¡COMPROBANTE RECIBIDO POR WHATSAPP!</b> 📱\n\n"
+        $caption = "📱 <b>¡COMPROBANTE RECIBIDO POR WHATSAPP!</b> 📱\n"
+            . "🆔 <b>Depósito #DEP-{$deposit->id}</b>\n\n"
             . "👤 <b>Cliente:</b> {$user->name}\n"
             . "📱 <b>WhatsApp:</b> <code>{$phoneFormatted}</code>\n"
             . "📧 <b>Email:</b> {$emailFormatted}\n"
             . "📅 <b>Fecha:</b> {$dateFormatted}\n\n"
             . "⚡ <i>Toca el monto exacto para acreditar al cliente:</i>\n"
-            . "💡 <i>O escribe el valor en el chat (ej: <code>25000</code> o <code>/aprobar 25000</code>).</i>";
+            . "💡 <i>O responde a esta foto con el valor exacto (ej: <code>18000</code>).</i>";
 
         $keyboardButtons = [];
 
@@ -202,6 +212,15 @@ class TelegramService
                     ]);
 
                 if ($response->successful()) {
+                    $resJson = $response->json();
+                    $msgId = $resJson['result']['message_id'] ?? null;
+                    if ($msgId && $deposit) {
+                        try {
+                            $deposit->update([
+                                'admin_notes' => trim(($deposit->admin_notes ?: '') . " [TG:{$msgId}]")
+                            ]);
+                        } catch (\Throwable $e) {}
+                    }
                     return true;
                 }
             }

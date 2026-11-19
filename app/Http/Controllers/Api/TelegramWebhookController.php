@@ -37,27 +37,47 @@ class TelegramWebhookController extends Controller
                     return response()->json(['status' => 'unauthorized'], 403);
                 }
 
-                // Si es comando /rechazar
-                if (strtolower($textMsg) === '/rechazar' || strtolower($textMsg) === 'rechazar') {
-                    $pendingDeposit = Deposit::with('user')->where('status', 'pending')->latest()->first();
-                    if (!$pendingDeposit) {
-                        TelegramService::sendMessage("ℹ️ No hay ningún comprobante pendiente por procesar en este momento.");
-                        return response()->json(['status' => 'no_pending']);
+                // 1. Verificar si el usuario respondió (reply_to_message) a una foto específica
+                $reply = $data['message']['reply_to_message'] ?? null;
+                $targetDeposit = null;
+                $targetMsgId = null;
+
+                if ($reply) {
+                    $targetMsgId = $reply['message_id'] ?? null;
+                    $replyText = ($reply['caption'] ?? '') . ' ' . ($reply['text'] ?? '');
+                    if (preg_match('/#DEP-(\d+)/', $replyText, $m)) {
+                        $targetDeposit = Deposit::with('user')->find((int) $m[1]);
                     }
-                    return $this->executeRejection($pendingDeposit, $pendingDeposit->user, $chatId, null, null);
+                    if (!$targetDeposit && $targetMsgId) {
+                        $targetDeposit = Deposit::with('user')->where('admin_notes', 'like', "%[TG:{$targetMsgId}]%")->first();
+                    }
                 }
 
-                // Detectar si el mensaje contiene un monto numérico ej: "25000", "/aprobar 25000", "$25.000"
+                // 2. Si no respondió a un mensaje específico, tomar el último pendiente
+                if (!$targetDeposit) {
+                    $targetDeposit = Deposit::with('user')->where('status', 'pending')->latest()->first();
+                }
+
+                if (!$targetDeposit) {
+                    TelegramService::sendMessage("ℹ️ No hay ningún comprobante pendiente por procesar en este momento.");
+                    return response()->json(['status' => 'no_pending']);
+                }
+
+                if ($targetDeposit->status !== 'pending') {
+                    TelegramService::sendMessage("ℹ️ El comprobante #DEP-{$targetDeposit->id} de {$targetDeposit->user->name} ya fue procesado ({$targetDeposit->status}).");
+                    return response()->json(['status' => 'already_processed']);
+                }
+
+                // Si es comando /rechazar
+                if (strtolower($textMsg) === '/rechazar' || strtolower($textMsg) === 'rechazar') {
+                    return $this->executeRejection($targetDeposit, $targetDeposit->user, $chatId, $targetMsgId, null);
+                }
+
+                // Detectar si el mensaje contiene un monto numérico ej: "18000", "/aprobar 18000", "$18.000"
                 $cleanNum = preg_replace('/[^0-9]/', '', $textMsg);
                 if (is_numeric($cleanNum) && (int) $cleanNum >= 1000) {
                     $customAmount = (float) $cleanNum;
-                    $pendingDeposit = Deposit::with('user')->where('status', 'pending')->latest()->first();
-                    if (!$pendingDeposit) {
-                        TelegramService::sendMessage("ℹ️ No se encontró ningún comprobante pendiente para aprobar con ese valor.");
-                        return response()->json(['status' => 'no_pending']);
-                    }
-
-                    return $this->executeApproval($pendingDeposit, $pendingDeposit->user, $customAmount, $chatId, null, null);
+                    return $this->executeApproval($targetDeposit, $targetDeposit->user, $customAmount, $chatId, $targetMsgId, null);
                 }
 
                 if ($textMsg === '/start' || $textMsg === '/ayuda') {
