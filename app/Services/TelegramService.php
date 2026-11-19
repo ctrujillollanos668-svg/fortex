@@ -276,7 +276,6 @@ class TelegramService
             return false;
         }
     }
-    }
 
     /**
      * Notificar una nueva solicitud de retiro
