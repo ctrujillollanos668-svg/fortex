@@ -148,9 +148,27 @@
                                             <button type="button" onclick="openRejectModal({{ $dep->id }}, '{{ $dep->user->name ?? 'Cliente' }}', '${{ number_format($dep->amount, 0, ',', '.') }} COP', '{{ $dep->payment_method }}', '{{ $dep->transaction_hash }}', '{{ $dep->encoded_image ?? ($dep->proof_image ? route('admin.deposits.image', $dep->id) : '') }}')" class="px-3 py-1.5 bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-400 font-bold rounded-xl text-xs transition cursor-pointer">
                                                 ✕ Rechazar
                                             </button>
+
+                                            <!-- Formulario Eliminar -->
+                                            <form method="POST" action="{{ route('admin.deposits.destroy', $dep->id) }}" onsubmit="return confirm('¿Seguro que deseas eliminar este comprobante?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" title="Eliminar registro" class="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-500/15 rounded-lg transition cursor-pointer">
+                                                    🗑️
+                                                </button>
+                                            </form>
                                         </div>
                                     @else
-                                        <span class="text-slate-500 text-[11px]">Procesado</span>
+                                        <div class="flex items-center justify-end gap-2">
+                                            <span class="text-slate-500 text-[11px]">Procesado</span>
+                                            <form method="POST" action="{{ route('admin.deposits.destroy', $dep->id) }}" onsubmit="return confirm('¿Seguro que deseas eliminar este comprobante?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" title="Eliminar registro" class="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-500/15 rounded-lg transition cursor-pointer">
+                                                    🗑️
+                                                </button>
+                                            </form>
+                                        </div>
                                     @endif
                                 </td>
                             </tr>

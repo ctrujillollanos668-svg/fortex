@@ -146,4 +146,20 @@ class AdminDepositController extends Controller
 
         return response()->file($path);
     }
+
+    public function destroy($id)
+    {
+        $deposit = Deposit::findOrFail($id);
+
+        if ($deposit->proof_image) {
+            $path = public_path($deposit->proof_image);
+            if (file_exists($path)) {
+                @unlink($path);
+            }
+        }
+
+        $deposit->delete();
+
+        return back()->with('success', 'Registro de comprobante eliminado exitosamente.');
+    }
 }

@@ -65,6 +65,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/deposit-img/{id}', [AdminDepositController::class, 'showImage'])->name('deposit.image');
     Route::post('/deposits/{id}/approve', [AdminDepositController::class, 'approve'])->name('deposits.approve');
     Route::post('/deposits/{id}/reject', [AdminDepositController::class, 'reject'])->name('deposits.reject');
+    Route::delete('/deposits/{id}', [AdminDepositController::class, 'destroy'])->name('deposits.destroy');
 
     // Gestión de Retiros
     Route::get('/withdrawals', [AdminWithdrawalController::class, 'index'])->name('withdrawals.index');
