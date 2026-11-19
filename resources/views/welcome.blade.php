@@ -466,71 +466,72 @@
             </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+        <div class="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-6 items-stretch">
             @if(isset($plans) && $plans->count() > 0)
                 @foreach($plans as $plan)
-                    <div class="bg-slate-900/80 border {{ $plan->badge ? 'border-emerald-500 shadow-emerald-500/20 scale-105' : 'border-slate-800' }} hover:border-emerald-500/50 rounded-3xl p-7 flex flex-col justify-between transition-all duration-300 hover:-translate-y-2 relative overflow-hidden group shadow-xl {{ $plan->isSoldOut() ? 'opacity-60 grayscale' : '' }}">
+                    <div class="bg-slate-900/80 border {{ $plan->badge ? 'border-emerald-500 shadow-emerald-500/20' : 'border-slate-800' }} hover:border-emerald-500/50 rounded-2xl sm:rounded-3xl p-3 sm:p-7 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 relative overflow-hidden group shadow-xl {{ $plan->isSoldOut() ? 'opacity-60 grayscale' : '' }}">
                         @if($plan->badge)
-                            <div class="absolute -right-12 top-7 bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 text-[10px] font-extrabold uppercase py-1 px-12 rotate-45 shadow-md">
+                            <div class="hidden sm:block absolute -right-12 top-7 bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 text-[10px] font-extrabold uppercase py-1 px-12 rotate-45 shadow-md">
                                 {{ $plan->badge }}
                             </div>
                         @endif
 
                         <div>
-                            <div class="flex items-center gap-2 flex-wrap mb-2">
-                                <span class="px-3 py-1 rounded-full bg-slate-800 text-slate-300 text-xs font-bold">
+                            <div class="flex items-center gap-1 sm:gap-2 flex-wrap mb-1.5 sm:mb-2">
+                                <span class="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full bg-slate-800 text-slate-300 text-[9px] sm:text-xs font-bold truncate max-w-full">
                                     {{ $plan->badge ?? 'Membresía VIP' }}
                                 </span>
                                 @if($plan->isSoldOut())
-                                    <span class="px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-400 text-[10px] font-black uppercase border border-rose-500/40">
+                                    <span class="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-rose-500/20 text-rose-400 text-[8px] sm:text-[10px] font-black uppercase border border-rose-500/40">
                                         🔴 Agotado
                                     </span>
                                 @elseif($plan->hasStockLimit())
-                                    <span class="px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-400 text-[10px] font-black uppercase border border-amber-500/40">
+                                    <span class="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-amber-500/20 text-amber-400 text-[8px] sm:text-[10px] font-black uppercase border border-amber-500/40">
                                         ⚡ Quedan {{ $plan->stock }} cupos
                                     </span>
                                 @endif
                             </div>
-                            <h3 class="text-2xl font-extrabold text-white mt-1">{{ $plan->name }}</h3>
-                            <p class="text-xs text-slate-400 mt-1 min-h-[32px]">{{ $plan->description ?? 'Rendimiento diario fijo garantizado en COP.' }}</p>
+                            <h3 class="text-sm sm:text-2xl font-black text-white mt-0.5 sm:mt-1 leading-snug">{{ $plan->name }}</h3>
+                            <p class="text-[10px] sm:text-xs text-slate-400 mt-0.5 sm:mt-1 line-clamp-2 sm:min-h-[32px]">{{ $plan->description ?? 'Rendimiento diario fijo garantizado en COP.' }}</p>
 
-                            <div class="my-6 py-4 border-y border-slate-800">
-                                <div class="text-3xl sm:text-4xl font-extrabold text-white font-mono">
-                                    ${{ number_format($plan->price, 0, ',', '.') }} <span class="text-xs font-normal text-emerald-400 font-sans">COP</span>
+                            <div class="my-2.5 sm:my-6 py-2 sm:py-4 border-y border-slate-800">
+                                <div class="text-base sm:text-4xl font-extrabold text-white font-mono leading-none">
+                                    ${{ number_format($plan->price, 0, ',', '.') }} <span class="text-[9px] sm:text-xs font-normal text-emerald-400 font-sans">COP</span>
                                 </div>
-                                <p class="text-xs text-emerald-400 font-semibold mt-1">
-                                    {{ $plan->daily_percentage }}% Diario (${{ number_format(($plan->price * $plan->daily_percentage) / 100, 0, ',', '.') }} COP / día)
+                                <p class="text-[10px] sm:text-xs text-emerald-400 font-semibold mt-1">
+                                    {{ $plan->daily_percentage }}% Diario <span class="hidden sm:inline">(${{ number_format(($plan->price * $plan->daily_percentage) / 100, 0, ',', '.') }} COP / día)</span>
                                 </p>
                             </div>
 
-                            <ul class="space-y-3 text-xs text-slate-300">
-                                <li class="flex items-center gap-2"><span class="text-emerald-400">✓</span> Duración: <strong>{{ $plan->duration_days }} Días</strong></li>
-                                <li class="flex items-center gap-2"><span class="text-emerald-400">✓</span> Tope máximo: <strong class="text-amber-400 font-mono">${{ number_format($plan->max_return, 0, ',', '.') }} COP</strong></li>
-                                <li class="flex items-center gap-2"><span class="text-emerald-400">✓</span> Comisión Nivel 1 activa (10%)</li>
-                                <li class="flex items-center gap-2"><span class="text-emerald-400">✓</span> Retiros rápidos a Nequi, Daviplata y Bancolombia</li>
+                            <ul class="space-y-1 sm:space-y-3 text-[10px] sm:text-xs text-slate-300">
+                                <li class="flex items-center gap-1 sm:gap-2"><span class="text-emerald-400">✓</span> <span>Duración: <strong>{{ $plan->duration_days }} Días</strong></span></li>
+                                <li class="flex items-center gap-1 sm:gap-2"><span class="text-emerald-400">✓</span> <span>Tope: <strong class="text-amber-400 font-mono">${{ number_format($plan->max_return, 0, ',', '.') }}</strong></span></li>
+                                <li class="flex items-center gap-1 sm:gap-2"><span class="text-emerald-400">✓</span> <span>Comisión Red: <strong>10% + 2%</strong></span></li>
+                                <li class="flex items-center gap-1 sm:gap-2"><span class="text-emerald-400">✓</span> <span>Nequi / Bancolombia</span></li>
                             </ul>
                         </div>
 
                         @if($plan->isSoldOut())
-                            <button type="button" disabled class="mt-8 w-full py-4 bg-slate-800 text-slate-500 font-bold text-xs rounded-xl text-center cursor-not-allowed border border-slate-700">
-                                ❌ Agotado (Sin cupos disponibles)
+                            <button type="button" disabled class="mt-3 sm:mt-8 w-full py-2.5 sm:py-4 bg-slate-800 text-slate-500 font-bold text-[10px] sm:text-xs rounded-xl text-center cursor-not-allowed border border-slate-700">
+                                ❌ Agotado
                             </button>
                         @else
                             @auth
-                                <!-- Botón para usuario autenticado hacia la sección de activación con selección de saldo -->
-                                <a href="{{ route('cliente.plans.index') }}" class="mt-8 block w-full py-4 {{ $plan->badge ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-black shadow-lg shadow-emerald-500/25' : 'bg-slate-800 hover:bg-slate-700 text-white font-bold' }} text-xs rounded-xl text-center transition cursor-pointer active:scale-95">
-                                    ⚡ Activar {{ $plan->name }}
+                                <a href="{{ route('cliente.plans.index') }}" class="mt-3 sm:mt-8 block w-full py-2.5 sm:py-4 {{ $plan->badge ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-black shadow-lg shadow-emerald-500/25' : 'bg-slate-800 hover:bg-slate-700 text-white font-bold' }} text-[11px] sm:text-xs rounded-xl text-center transition cursor-pointer active:scale-95">
+                                    <span class="sm:hidden">⚡ Activar</span>
+                                    <span class="hidden sm:inline">⚡ Activar {{ $plan->name }}</span>
                                 </a>
                             @else
-                                <button onclick="openAuthModal('register')" class="mt-8 w-full py-4 {{ $plan->badge ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/25' : 'bg-slate-800 hover:bg-slate-700 text-white' }} font-extrabold text-xs rounded-xl text-center transition cursor-pointer">
-                                    Activar {{ $plan->name }} ⚡
+                                <button onclick="openAuthModal('register')" class="mt-3 sm:mt-8 w-full py-2.5 sm:py-4 {{ $plan->badge ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/25' : 'bg-slate-800 hover:bg-slate-700 text-white' }} font-extrabold text-[11px] sm:text-xs rounded-xl text-center transition cursor-pointer">
+                                    <span class="sm:hidden">Activar ⚡</span>
+                                    <span class="hidden sm:inline">Activar {{ $plan->name }} ⚡</span>
                                 </button>
                             @endauth
                         @endif
                     </div>
                 @endforeach
             @else
-                <div class="col-span-3 text-center py-12 text-slate-500">
+                <div class="col-span-2 lg:col-span-3 text-center py-12 text-slate-500">
                     <p>No hay ofertas de planes disponibles en este momento.</p>
                 </div>
             @endif
