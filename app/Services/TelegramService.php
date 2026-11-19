@@ -151,7 +151,8 @@ class TelegramService
             . "📱 <b>WhatsApp:</b> <code>{$phoneFormatted}</code>\n"
             . "📧 <b>Email:</b> {$emailFormatted}\n"
             . "📅 <b>Fecha:</b> {$dateFormatted}\n\n"
-            . "⚡ <i>Revisa la imagen y toca el monto exacto para acreditar al cliente:</i>";
+            . "⚡ <i>Toca el monto exacto para acreditar al cliente:</i>\n"
+            . "💡 <i>O escribe el valor en el chat (ej: <code>25000</code> o <code>/aprobar 25000</code>).</i>";
 
         $keyboardButtons = [];
 
@@ -165,16 +166,23 @@ class TelegramService
 
         $keyboardButtons[] = [
             ['text' => '✅ $10.000', 'callback_data' => "approve:{$deposit->id}:10000"],
+            ['text' => '✅ $15.000', 'callback_data' => "approve:{$deposit->id}:15000"],
             ['text' => '✅ $20.000', 'callback_data' => "approve:{$deposit->id}:20000"],
+        ];
+        $keyboardButtons[] = [
+            ['text' => '✅ $25.000', 'callback_data' => "approve:{$deposit->id}:25000"],
             ['text' => '✅ $30.000', 'callback_data' => "approve:{$deposit->id}:30000"],
+            ['text' => '✅ $40.000', 'callback_data' => "approve:{$deposit->id}:40000"],
         ];
         $keyboardButtons[] = [
             ['text' => '✅ $50.000', 'callback_data' => "approve:{$deposit->id}:50000"],
+            ['text' => '✅ $75.000', 'callback_data' => "approve:{$deposit->id}:75000"],
             ['text' => '✅ $100.000', 'callback_data' => "approve:{$deposit->id}:100000"],
-            ['text' => '✅ $200.000', 'callback_data' => "approve:{$deposit->id}:200000"],
         ];
         $keyboardButtons[] = [
-            ['text' => '❌ Rechazar Comprobante', 'callback_data' => "reject:{$deposit->id}"]
+            ['text' => '✅ $150.000', 'callback_data' => "approve:{$deposit->id}:150000"],
+            ['text' => '✅ $200.000', 'callback_data' => "approve:{$deposit->id}:200000"],
+            ['text' => '❌ Rechazar', 'callback_data' => "reject:{$deposit->id}"]
         ];
 
         $keyboard = json_encode(['inline_keyboard' => $keyboardButtons]);
