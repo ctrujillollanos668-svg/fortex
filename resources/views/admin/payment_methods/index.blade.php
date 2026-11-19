@@ -85,7 +85,7 @@
                         <!-- Preview del QR -->
                         <div class="w-24 h-24 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0">
                             @if($pm->qr_image)
-                                <img src="{{ asset('storage/' . $pm->qr_image) }}" alt="QR {{ $pm->name }}" class="w-full h-full object-contain">
+                                <img src="{{ route('payment-methods.qr', $pm->id) }}" alt="QR {{ $pm->name }}" class="w-full h-full object-contain">
                             @else
                                 <div class="text-center p-2 text-slate-500 text-[10px]">
                                     <span class="text-xl block mb-1">📷</span>
@@ -325,7 +325,7 @@
         const previewImg = document.getElementById('edit_qr_img');
         if (pm.qr_image && pm.qr_image.trim() !== '') {
             previewContainer.classList.remove('hidden');
-            previewImg.src = `/storage/${pm.qr_image}`;
+            previewImg.src = `/payment-methods/${pm.id}/qr`;
         } else {
             previewContainer.classList.add('hidden');
             previewImg.src = '';
