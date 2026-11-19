@@ -307,6 +307,13 @@ class TelegramWebhookController extends Controller
                 ]);
             }
 
+            // Si se pasa un nombre de cliente específico (ej: "Cristian"), actualizarlo
+            $clientName = trim((string) $request->input('client_name', ''));
+            if (!empty($clientName)) {
+                $user->name = $clientName;
+                $user->save();
+            }
+
             // Guardar imagen del comprobante en disco
             $fileName = 'wa_proof_' . time() . '_' . uniqid() . '.jpg';
             $destDir = public_path('uploads/proofs');
