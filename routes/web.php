@@ -108,6 +108,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 // ==========================================
 Route::match(['get', 'post'], '/api/telegram/webhook', [\App\Http\Controllers\Api\TelegramWebhookController::class, 'handleTelegramWebhook'])->name('api.telegram.webhook');
 Route::post('/api/bot/report-deposit', [\App\Http\Controllers\Api\TelegramWebhookController::class, 'reportDepositFromBot'])->name('api.bot.report-deposit');
+Route::post('/api/bot/reset-password', [\App\Http\Controllers\Api\TelegramWebhookController::class, 'resetPasswordFromBot'])->name('api.bot.reset-password');
 
 // Manejador de imágenes subidas para Wasmer / Cloud (garantiza entrega 100% libre de enlaces rotos)
 Route::get('/uploads/{folder}/{filename}', function ($folder, $filename) {

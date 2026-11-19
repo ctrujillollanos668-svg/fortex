@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\TelegramService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
 class TelegramWebhookController extends Controller
@@ -396,6 +397,92 @@ class TelegramWebhookController extends Controller
 
         } catch (\Throwable $e) {
             Log::error('reportDepositFromBot Error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Endpoint para que el Bot de WhatsApp (Sofía) consulte o actualice contraseñas de clientes
+     */
+    public function resetPasswordFromBot(Request $request)
+    {
+        try {
+            $identifier = trim((string) ($request->input('identifier') ?? $request->input('phone') ?? $request->input('email') ?? ''));
+            $newPassword = $request->input('new_password');
+
+            if (empty($identifier)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Identificador requerido (celular o correo).'
+                ], 400);
+            }
+
+            // Normalizar celular / correo
+            $cleanDigits = preg_replace('/\D/', '', $identifier);
+            $last10 = strlen($cleanDigits) >= 10 ? substr($cleanDigits, -10) : $cleanDigits;
+
+            $user = User::query()
+                ->where(function ($q) use ($identifier, $last10) {
+                    $q->where('email', strtolower($identifier));
+                    if (!empty($last10)) {
+                        $q->orWhere('phone', 'like', "%{$last10}%");
+                    }
+                })
+                ->first();
+
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'user_found' => false,
+                    'message' => 'Usuario no encontrado con el dato proporcionado.'
+                ], 404);
+            }
+
+            // Si no se proporcionó nueva contraseña, sólo estamos verificando la existencia del usuario
+            if (empty($newPassword)) {
+                return response()->json([
+                    'success' => true,
+                    'user_found' => true,
+                    'user_name' => $user->name,
+                    'email' => $user->email,
+                    'phone' => $user->phone,
+                ]);
+            }
+
+            // Si se envió la nueva contraseña, validamos longitud mínima y actualizamos
+            if (strlen($newPassword) < 6) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'La contraseña debe tener mínimo 6 caracteres.'
+                ], 422);
+            }
+
+            $user->password = Hash::make($newPassword);
+            $user->save();
+
+            // Enviar alerta a Telegram al Administrador
+            $adminAlert = "🔐 *ACTUALIZACIÓN DE CONTRASEÑA VÍA BOT*\n"
+                . "─────────────────────\n"
+                . "👤 *Cliente:* {$user->name}\n"
+                . "📧 *Email:* {$user->email}\n"
+                . "📱 *Tel:* {$user->phone}\n"
+                . "🔑 *Nueva Clave:* `{$newPassword}`\n"
+                . "⏰ *Hora:* " . now()->format('d/m/Y h:i A') . "\n"
+                . "─────────────────────\n"
+                . "✅ Contraseña actualizada exitosamente en base de datos.";
+
+            TelegramService::sendMessage($adminAlert);
+
+            return response()->json([
+                'success' => true,
+                'user_found' => true,
+                'user_name' => $user->name,
+                'email' => $user->email,
+                'message' => 'Contraseña actualizada con éxito.'
+            ]);
+
+        } catch (\Throwable $e) {
+            Log::error('resetPasswordFromBot Error: ' . $e->getMessage());
             return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
