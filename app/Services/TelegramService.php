@@ -305,25 +305,79 @@ class TelegramService
     }
 
     /**
-     * Notificar una nueva solicitud de retiro
+     * Notificar una nueva solicitud de retiro con imagen y enlace directo
      */
     public static function notifyNewWithdrawal($withdrawal, $user): bool
     {
+        $token = self::getBotToken();
+        $chatId = self::getChatId();
+
+        if (empty($token) || empty($chatId)) {
+            return false;
+        }
+
         $amountFormatted = number_format($withdrawal->amount, 0, ',', '.');
         $netFormatted = number_format($withdrawal->net_amount, 0, ',', '.');
         $feeFormatted = number_format($withdrawal->fee, 0, ',', '.');
         $dateFormatted = now()->setTimezone('America/Bogota')->format('d/m/Y - h:i A');
         $phoneFormatted = $user->phone ? $user->phone : 'Sin teléfono';
 
-        $text = "📤 <b>¡NUEVA SOLICITUD DE RETIRO!</b> 📤\n\n"
+        $caption = "💸 <b>¡NUEVA SOLICITUD DE RETIRO!</b> 💸\n"
+            . "🆔 <b>Retiro #RET-{$withdrawal->id}</b>\n\n"
             . "👤 <b>Cliente:</b> {$user->name}\n"
             . "📱 <b>Teléfono:</b> <code>{$phoneFormatted}</code>\n"
+            . "📧 <b>Email:</b> {$user->email}\n"
             . "💰 <b>Monto Solicitado:</b> <b>\${$amountFormatted} COP</b>\n"
-            . "💸 <b>Neto a Transferir:</b> <b>\${$netFormatted} COP</b> (Comisión: \${$feeFormatted})\n"
+            . "📉 <b>Comisión Retiro (8%):</b> <b>\${$feeFormatted} COP</b>\n"
+            . "💵 <b>TOTAL NETO A TRANSFERIR:</b> <b>\${$netFormatted} COP</b>\n"
             . "🏦 <b>Destino:</b> <code>{$withdrawal->wallet_or_account}</code>\n"
             . "📅 <b>Fecha:</b> {$dateFormatted}\n\n"
-            . "⚡ <i>Entra al panel de administración para procesar o transferir este retiro.</i>";
+            . "⚡ <i>Realiza la transferencia al cliente y gestiona el retiro en el panel.</i>";
 
-        return self::sendMessage($text);
+        $keyboard = json_encode([
+            'inline_keyboard' => [
+                [
+                    ['text' => '🌐 Gestionar Retiros en Panel Web', 'url' => 'https://fortex.wasmer.app/admin/withdrawals']
+                ]
+            ]
+        ]);
+
+        try {
+            $bannerPath = public_path('img/retiro_banner.jpg');
+            if (!file_exists($bannerPath)) {
+                $bannerPath = public_path('img/fortex.jpg');
+            }
+
+            if (file_exists($bannerPath) && is_readable($bannerPath)) {
+                $fileContent = file_get_contents($bannerPath);
+                $fileName = basename($bannerPath);
+
+                $response = Http::timeout(15)
+                    ->attach('photo', $fileContent, $fileName)
+                    ->post("https://api.telegram.org/bot{$token}/sendPhoto", [
+                        'chat_id' => $chatId,
+                        'caption' => $caption,
+                        'parse_mode' => 'HTML',
+                        'reply_markup' => $keyboard,
+                    ]);
+
+                if ($response->successful()) {
+                    return true;
+                }
+            }
+
+            // Fallback en mensaje de texto con botón si no carga la imagen
+            $response = Http::timeout(8)->asForm()->post("https://api.telegram.org/bot{$token}/sendMessage", [
+                'chat_id' => $chatId,
+                'text' => $caption,
+                'parse_mode' => 'HTML',
+                'reply_markup' => $keyboard,
+            ]);
+
+            return $response->successful();
+        } catch (\Throwable $e) {
+            Log::error('TelegramService notifyNewWithdrawal Error: ' . $e->getMessage());
+            return self::sendMessage($caption);
+        }
     }
 }
