@@ -417,24 +417,27 @@ class TelegramWebhookController extends Controller
                 ], 400);
             }
 
-            // Normalizar celular / correo
+            // Normalizar celular (estricto: coincidencia por teléfono registrado)
             $cleanDigits = preg_replace('/\D/', '', $identifier);
             $last10 = strlen($cleanDigits) >= 10 ? substr($cleanDigits, -10) : $cleanDigits;
 
+            if (empty($last10)) {
+                return response()->json([
+                    'success' => false,
+                    'user_found' => false,
+                    'message' => 'Número de teléfono no válido.'
+                ], 400);
+            }
+
             $user = User::query()
-                ->where(function ($q) use ($identifier, $last10) {
-                    $q->where('email', strtolower($identifier));
-                    if (!empty($last10)) {
-                        $q->orWhere('phone', 'like', "%{$last10}%");
-                    }
-                })
+                ->where('phone', 'like', "%{$last10}%")
                 ->first();
 
             if (!$user) {
                 return response()->json([
                     'success' => false,
                     'user_found' => false,
-                    'message' => 'Usuario no encontrado con el dato proporcionado.'
+                    'message' => 'Usuario no encontrado con este número de WhatsApp.'
                 ], 404);
             }
 
@@ -483,6 +486,32 @@ class TelegramWebhookController extends Controller
 
         } catch (\Throwable $e) {
             Log::error('resetPasswordFromBot Error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Reportar a Telegram intentos sospechosos de recuperación de contraseña
+     */
+    public function reportSuspiciousReset(Request $request)
+    {
+        try {
+            $phone = trim((string) $request->input('phone', ''));
+            $msg = trim((string) $request->input('message', ''));
+
+            $alert = "🚨 *INTENTO DE RECUPERACIÓN BLOQUEADO*\n"
+                . "─────────────────────\n"
+                . "📱 *WhatsApp:* +{$phone}\n"
+                . "💬 *Mensaje:* \"{$msg}\"\n"
+                . "⏰ *Hora:* " . now()->format('d/m/Y h:i A') . "\n"
+                . "─────────────────────\n"
+                . "🛡️ *Motivo:* El número de WhatsApp no coincide con ninguna cuenta activa en Fortex. El bot bloqueó la solicitud automáticamente por seguridad.";
+
+            TelegramService::sendMessage($alert);
+
+            return response()->json(['success' => true]);
+        } catch (\Throwable $e) {
+            Log::error('reportSuspiciousReset Error: ' . $e->getMessage());
             return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
