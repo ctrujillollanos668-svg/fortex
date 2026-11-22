@@ -23,7 +23,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Auto-sincronización segura y ultrarrápida para Wasmer / Serverless
         try {
-            if (!cache()->has('system_db_sync_v7')) {
+            if (!cache()->has('system_db_sync_v8')) {
                 // 1. Columnas en tabla users
                 if (Schema::hasTable('users')) {
                     if (!Schema::hasColumn('users', 'last_spin_at')) {
@@ -66,7 +66,21 @@ class AppServiceProvider extends ServiceProvider
                     }
                 }
 
-                // 4. Tablas para Códigos Promocionales y Sorteos
+                // 4. Columnas en tabla referral_commissions (fix producción Wasmer)
+                if (Schema::hasTable('referral_commissions')) {
+                    if (!Schema::hasColumn('referral_commissions', 'downline_id')) {
+                        Schema::table('referral_commissions', function (Blueprint $table) {
+                            $table->unsignedBigInteger('downline_id')->nullable()->after('sponsor_id');
+                        });
+                    }
+                    if (!Schema::hasColumn('referral_commissions', 'description')) {
+                        Schema::table('referral_commissions', function (Blueprint $table) {
+                            $table->string('description')->nullable()->after('percentage');
+                        });
+                    }
+                }
+
+                // 5. Tablas para Códigos Promocionales y Sorteos
                 if (!Schema::hasTable('promo_codes')) {
                     Schema::create('promo_codes', function (Blueprint $table) {
                         $table->id();
@@ -93,7 +107,7 @@ class AppServiceProvider extends ServiceProvider
                     });
                 }
 
-                cache()->forever('system_db_sync_v7', true);
+                cache()->forever('system_db_sync_v8', true);
             }
         } catch (\Throwable $e) {
             // Continuar sin bloquear el request
