@@ -256,22 +256,30 @@
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="block font-semibold text-slate-300 mb-1">Precio ($ COP)</label>
-                    <input type="number" step="any" id="edit_price" name="price" required class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white font-mono">
+                    <input type="number" step="any" id="edit_price" name="price" required oninput="autoCalcEdit()" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white font-mono focus:outline-none focus:border-purple-500">
+                    <span class="text-[10px] text-slate-500">Ej: 30000 = $30.000 COP</span>
                 </div>
                 <div>
                     <label class="block font-semibold text-slate-300 mb-1">% Diario de Retorno</label>
-                    <input type="number" step="any" id="edit_daily_percentage" name="daily_percentage" required class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white font-mono">
+                    <input type="number" step="any" id="edit_daily_percentage" name="daily_percentage" required oninput="autoCalcEdit()" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white font-mono focus:outline-none focus:border-purple-500">
+                    <div class="flex items-center justify-between mt-0.5">
+                        <span class="text-[10px] text-slate-500">Ej: 5 (5%), 15 (15%)</span>
+                        <span id="edit_daily_preview" class="text-[10px] text-emerald-400 font-bold">$0 COP / día</span>
+                    </div>
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="block font-semibold text-slate-300 mb-1">Duración (Días)</label>
-                    <input type="number" id="edit_duration_days" name="duration_days" required class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white font-mono">
+                    <input type="number" id="edit_duration_days" name="duration_days" required oninput="autoCalcEdit()" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white font-mono focus:outline-none focus:border-purple-500">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1">Tope Máximo ($ COP)</label>
-                    <input type="number" step="any" id="edit_max_return" name="max_return" required class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white font-mono">
+                    <label class="block font-semibold text-slate-300 mb-1 flex items-center justify-between">
+                        <span>Tope Máximo ($ COP)</span>
+                    </label>
+                    <input type="number" step="any" id="edit_max_return" name="max_return" required class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white font-mono focus:outline-none focus:border-purple-500">
+                    <span class="text-[10px] text-amber-400 block font-semibold">Límite total calculado</span>
                 </div>
             </div>
 
@@ -322,34 +330,58 @@
 
         if (price > 0 && percentage > 0) {
             const daily = (price * percentage) / 100;
-            const total = daily * duration;
+            const total = Math.round(daily * duration);
 
-            document.getElementById('create_daily_preview').innerText = '$' + daily.toLocaleString('es-CO') + ' COP / día';
-            
-            // Si el tope está vacío o desactualizado, sugerir el cálculo total
-            const maxField = document.getElementById('create_max_return');
-            if (!maxField.dataset.customized) {
-                maxField.value = total;
-            }
+            document.getElementById('create_daily_preview').innerText = '$' + Math.round(daily).toLocaleString('es-CO') + ' COP / día';
+            document.getElementById('create_max_return').value = total;
         }
     }
 
-    document.getElementById('create_max_return').addEventListener('input', function() {
-        this.dataset.customized = "true";
-    });
+    function autoCalcEdit() {
+        const price = parseFloat(document.getElementById('edit_price').value) || 0;
+        const percentage = parseFloat(document.getElementById('edit_daily_percentage').value) || 0;
+        const duration = parseInt(document.getElementById('edit_duration_days').value) || 30;
+
+        if (price > 0 && percentage > 0) {
+            const daily = (price * percentage) / 100;
+            const total = Math.round(daily * duration);
+
+            const previewEl = document.getElementById('edit_daily_preview');
+            if (previewEl) {
+                previewEl.innerText = '$' + Math.round(daily).toLocaleString('es-CO') + ' COP / día';
+            }
+            document.getElementById('edit_max_return').value = total;
+        }
+    }
 
     function openEditModal(plan) {
         document.getElementById('editPlanForm').action = '/admin/plans/' + plan.id;
         document.getElementById('edit_name').value = plan.name;
-        document.getElementById('edit_price').value = plan.price;
-        document.getElementById('edit_daily_percentage').value = plan.daily_percentage;
-        document.getElementById('edit_duration_days').value = plan.duration_days;
-        document.getElementById('edit_max_return').value = plan.max_return;
+
+        // Formatear números limpiamente (evita '2000000.00' o comas)
+        const price = parseFloat(plan.price) || 0;
+        const percentage = parseFloat(plan.daily_percentage) || 0;
+        const duration = parseInt(plan.duration_days) || 30;
+        const maxReturn = parseFloat(plan.max_return) || Math.round(((price * percentage) / 100) * duration);
+
+        document.getElementById('edit_price').value = price;
+        document.getElementById('edit_daily_percentage').value = percentage;
+        document.getElementById('edit_duration_days').value = duration;
+        document.getElementById('edit_max_return').value = maxReturn;
         document.getElementById('edit_badge').value = plan.badge || '';
         document.getElementById('edit_stock').value = (plan.stock !== null && plan.stock !== undefined) ? plan.stock : '';
         document.getElementById('edit_description').value = plan.description || '';
         document.getElementById('edit_status').checked = plan.status ? true : false;
         document.getElementById('edit_show_on_home').checked = plan.show_on_home ? true : false;
+
+        // Mostrar cálculo diario en tiempo real al abrir
+        if (price > 0 && percentage > 0) {
+            const daily = (price * percentage) / 100;
+            document.getElementById('edit_daily_preview').innerText = '$' + Math.round(daily).toLocaleString('es-CO') + ' COP / día';
+        } else {
+            document.getElementById('edit_daily_preview').innerText = '$0 COP / día';
+        }
+
         document.getElementById('editPlanModal').classList.remove('hidden');
     }
 </script>
