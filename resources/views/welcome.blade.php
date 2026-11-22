@@ -5,12 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>FORTEX ⚡ | Plataforma Oficial de Cómputo y Rendimientos</title>
     <link rel="icon" type="image/jpeg" href="{{ asset('img/fortex.jpg') }}">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
+        /* Reglas críticas de seguridad visual para conexiones móviles lentas */
+        img { max-width: 100%; height: auto; }
+        header img { width: 48px !important; height: 48px !important; object-fit: cover; }
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: #030712;
@@ -95,8 +99,8 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             <!-- Logo Oficial -->
             <a href="/" class="flex items-center gap-3 group">
-                <div class="w-12 h-12 rounded-2xl bg-black border border-emerald-500/30 flex items-center justify-center overflow-hidden shadow-lg shadow-emerald-500/25 group-hover:scale-105 transition-transform">
-                    <img src="{{ asset('img/fortex.jpg') }}" alt="FORTEX" class="w-full h-full object-cover">
+                <div class="w-12 h-12 rounded-2xl bg-black border border-emerald-500/30 flex items-center justify-center overflow-hidden shadow-lg shadow-emerald-500/25 group-hover:scale-105 transition-transform" style="width:48px;height:48px;min-width:48px;min-height:48px;max-width:48px;max-height:48px;border-radius:16px;overflow:hidden;display:flex;align-items:center;justify-content:center;">
+                    <img src="{{ asset('img/fortex.jpg') }}" alt="FORTEX" width="48" height="48" style="width:48px;height:48px;max-width:48px;max-height:48px;object-fit:cover;border-radius:14px;" class="w-full h-full object-cover">
                 </div>
                 <div>
                     <span class="text-xl font-extrabold tracking-tight text-white block leading-none">FORTEX</span>
