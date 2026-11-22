@@ -385,7 +385,7 @@
             <a href="https://api.whatsapp.com/send?phone={{ env('SUPPORT_WHATSAPP', '573115138588') }}&text={{ urlencode('Hola Soporte FORTEX 🟢, tengo una consulta/queja sobre mi cuenta.') }}" target="_blank" class="w-full py-3 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-bold rounded-xl flex items-center justify-center gap-2 transition">
                 <span>💬</span> WhatsApp Oficial (8:00 AM - 8:00 PM)
             </a>
-            <a href="https://t.me/+{{ env('SUPPORT_TELEGRAM', '573115138588') }}" target="_blank" class="w-full py-3 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 font-bold rounded-xl flex items-center justify-center gap-2 transition">
+            <a href="https://t.me/{{ env('SUPPORT_TELEGRAM', 'SoporteXoficial') }}" target="_blank" class="w-full py-3 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 font-bold rounded-xl flex items-center justify-center gap-2 transition cursor-pointer">
                 <span>✈️</span> Telegram Soporte (8:00 AM - 8:00 PM)
             </a>
         </div>

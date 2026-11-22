@@ -39,7 +39,7 @@
             <a href="https://api.whatsapp.com/send?text={{ $shareText }}" target="_blank" class="py-2.5 px-3 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-bold text-center transition flex items-center justify-center gap-2">
                 <span>💬</span> WhatsApp
             </a>
-            <a href="https://t.me/share/url?url={{ urlencode(url('/register?ref=' . $user->referral_code)) }}&text={{ urlencode('¡Gana rendimientos diarios con tu membresía VIP!') }}" target="_blank" class="py-2.5 px-3 bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-400 border border-cyan-500/30 rounded-xl text-xs font-bold text-center transition flex items-center justify-center gap-2">
+            <a href="https://t.me/{{ env('SUPPORT_TELEGRAM', 'SoporteXoficial') }}" target="_blank" class="py-2.5 px-3 bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-400 border border-cyan-500/30 rounded-xl text-xs font-bold text-center transition flex items-center justify-center gap-2 cursor-pointer">
                 <span>✈️</span> Telegram
             </a>
         </div>
