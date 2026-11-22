@@ -3,8 +3,6 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,101 +19,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Auto-sincronización segura y ultrarrápida para Wasmer / Serverless
-        try {
-            if (!cache()->has('system_db_sync_v9')) {
-                // 1. Columnas en tabla users
-                if (Schema::hasTable('users')) {
-                    if (!Schema::hasColumn('users', 'last_spin_at')) {
-                        Schema::table('users', function (Blueprint $table) {
-                            $table->timestamp('last_spin_at')->nullable()->after('status');
-                        });
-                    }
-                    if (!Schema::hasColumn('users', 'claimed_red_packet')) {
-                        Schema::table('users', function (Blueprint $table) {
-                            $table->boolean('claimed_red_packet')->default(false)->after('status');
-                        });
-                    }
-                    if (!Schema::hasColumn('users', 'roulette_spins')) {
-                        Schema::table('users', function (Blueprint $table) {
-                            $table->unsignedInteger('roulette_spins')->default(1)->after('status');
-                        });
-                    }
-                }
-
-                // 2. Columnas en tabla plans
-                if (Schema::hasTable('plans')) {
-                    if (!Schema::hasColumn('plans', 'stock')) {
-                        Schema::table('plans', function (Blueprint $table) {
-                            $table->integer('stock')->nullable()->after('max_return');
-                        });
-                    }
-                    if (!Schema::hasColumn('plans', 'show_on_home')) {
-                        Schema::table('plans', function (Blueprint $table) {
-                            $table->boolean('show_on_home')->default(true)->after('status');
-                        });
-                    }
-                }
-
-                // 3. Columnas en tabla withdrawals
-                if (Schema::hasTable('withdrawals')) {
-                    if (!Schema::hasColumn('withdrawals', 'admin_notes')) {
-                        Schema::table('withdrawals', function (Blueprint $table) {
-                            $table->text('admin_notes')->nullable()->after('status');
-                        });
-                    }
-                    if (!Schema::hasColumn('withdrawals', 'account_holder_name')) {
-                        Schema::table('withdrawals', function (Blueprint $table) {
-                            $table->string('account_holder_name')->nullable()->after('wallet_or_account');
-                        });
-                    }
-                }
-
-                // 4. Columnas en tabla referral_commissions (fix producción Wasmer)
-                if (Schema::hasTable('referral_commissions')) {
-                    if (!Schema::hasColumn('referral_commissions', 'downline_id')) {
-                        Schema::table('referral_commissions', function (Blueprint $table) {
-                            $table->unsignedBigInteger('downline_id')->nullable()->after('sponsor_id');
-                        });
-                    }
-                    if (!Schema::hasColumn('referral_commissions', 'description')) {
-                        Schema::table('referral_commissions', function (Blueprint $table) {
-                            $table->string('description')->nullable()->after('percentage');
-                        });
-                    }
-                }
-
-                // 5. Tablas para Códigos Promocionales y Sorteos
-                if (!Schema::hasTable('promo_codes')) {
-                    Schema::create('promo_codes', function (Blueprint $table) {
-                        $table->id();
-                        $table->string('code')->unique();
-                        $table->decimal('reward_amount', 12, 2)->default(0);
-                        $table->unsignedInteger('max_uses')->default(1);
-                        $table->unsignedInteger('used_count')->default(0);
-                        $table->boolean('status')->default(true);
-                        $table->string('description')->nullable();
-                        $table->timestamp('expires_at')->nullable();
-                        $table->timestamps();
-                    });
-                }
-
-                if (!Schema::hasTable('promo_code_redemptions')) {
-                    Schema::create('promo_code_redemptions', function (Blueprint $table) {
-                        $table->id();
-                        $table->unsignedBigInteger('promo_code_id');
-                        $table->unsignedBigInteger('user_id');
-                        $table->decimal('reward_amount', 12, 2)->default(0);
-                        $table->timestamps();
-
-                        $table->index(['promo_code_id', 'user_id']);
-                    });
-                }
-
-                cache()->forever('system_db_sync_v9', true);
-            }
-        } catch (\Throwable $e) {
-            // Continuar sin bloquear el request
-        }
+        //
     }
 }
