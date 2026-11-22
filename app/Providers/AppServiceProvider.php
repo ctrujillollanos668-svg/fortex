@@ -23,7 +23,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Auto-sincronización segura y ultrarrápida para Wasmer / Serverless
         try {
-            if (!cache()->has('system_db_sync_v8')) {
+            if (!cache()->has('system_db_sync_v9')) {
                 // 1. Columnas en tabla users
                 if (Schema::hasTable('users')) {
                     if (!Schema::hasColumn('users', 'last_spin_at')) {
@@ -62,6 +62,11 @@ class AppServiceProvider extends ServiceProvider
                     if (!Schema::hasColumn('withdrawals', 'admin_notes')) {
                         Schema::table('withdrawals', function (Blueprint $table) {
                             $table->text('admin_notes')->nullable()->after('status');
+                        });
+                    }
+                    if (!Schema::hasColumn('withdrawals', 'account_holder_name')) {
+                        Schema::table('withdrawals', function (Blueprint $table) {
+                            $table->string('account_holder_name')->nullable()->after('wallet_or_account');
                         });
                     }
                 }
@@ -107,7 +112,7 @@ class AppServiceProvider extends ServiceProvider
                     });
                 }
 
-                cache()->forever('system_db_sync_v8', true);
+                cache()->forever('system_db_sync_v9', true);
             }
         } catch (\Throwable $e) {
             // Continuar sin bloquear el request

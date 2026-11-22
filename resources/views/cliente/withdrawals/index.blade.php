@@ -139,10 +139,31 @@
                 </select>
             </div>
 
+            <!-- Nombre del Titular / Beneficiario -->
+            <div>
+                <label class="block font-semibold text-slate-300 mb-1">
+                    Nombre Completo del Titular de la Cuenta
+                    <span class="text-rose-400 ml-0.5">*</span>
+                </label>
+                <input type="text" name="account_holder_name" required
+                    placeholder="Ej: Carlos Andrés Trujillo"
+                    value="{{ old('account_holder_name') }}"
+                    class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-white text-sm focus:outline-none focus:border-cyan-500 @error('account_holder_name') border-rose-500 @enderror">
+                <p class="text-[10px] text-slate-500 mt-1">Debe coincidir exactamente con el nombre registrado en Nequi o Bancolombia.</p>
+                @error('account_holder_name')
+                    <p class="text-[10px] text-rose-400 mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
             <!-- Datos de Destino -->
             <div>
                 <label class="block font-semibold text-slate-300 mb-1">Número de Celular, Cuenta o Billetera Receptora</label>
-                <input type="text" name="wallet_or_account" required placeholder="Ej: 3001234567 o 123-456789-00" class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-white font-mono text-sm focus:outline-none focus:border-cyan-500">
+                <input type="text" name="wallet_or_account" required placeholder="Ej: 3001234567 o 123-456789-00"
+                    value="{{ old('wallet_or_account') }}"
+                    class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-white font-mono text-sm focus:outline-none focus:border-cyan-500 @error('wallet_or_account') border-rose-500 @enderror">
+                @error('wallet_or_account')
+                    <p class="text-[10px] text-rose-400 mt-1">{{ $message }}</p>
+                @enderror
             </div>
 
             <!-- Botón de Envío -->
@@ -186,6 +207,9 @@
                             <div class="text-[11px] text-slate-400 mt-1">
                                 <span>Recibes neto: <strong class="text-emerald-400 font-mono font-extrabold">${{ number_format($with->net_amount, 0, ',', '.') }} COP</strong></span>
                                 <span class="text-slate-500 block text-[10px] mt-0.5">Destino: {{ $with->wallet_or_account }}</span>
+                                @if($with->account_holder_name)
+                                    <span class="text-slate-500 block text-[10px]">Titular: {{ $with->account_holder_name }}</span>
+                                @endif
                             </div>
                         </div>
                         <div class="text-right flex sm:flex-col items-center sm:items-end justify-between">

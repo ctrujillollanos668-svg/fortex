@@ -16,6 +16,7 @@ class Withdrawal extends Model
         'fee',
         'net_amount',
         'wallet_or_account',
+        'account_holder_name',
         'status',
         'admin_notes',
     ];

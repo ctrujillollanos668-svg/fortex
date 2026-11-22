@@ -81,6 +81,11 @@
                                     <div class="text-[10px] text-rose-400 font-mono font-semibold">Comisión (8%): -${{ number_format($with->fee, 0, ',', '.') }} COP</div>
                                 </td>
                                 <td class="py-4 px-4">
+                                    @if($with->account_holder_name)
+                                        <div class="text-xs font-bold text-white mb-1 flex items-center gap-1">
+                                            <span class="text-slate-400 font-normal">Titular:</span> {{ $with->account_holder_name }}
+                                        </div>
+                                    @endif
                                     <div class="flex items-center gap-1.5 font-mono text-slate-200 bg-slate-950 px-2.5 py-1.5 rounded-lg border border-slate-800 text-[11px]">
                                         <span class="truncate max-w-[200px]" id="wallet-{{ $with->id }}">{{ $with->wallet_or_account }}</span>
                                         <button onclick="navigator.clipboard.writeText('{{ $with->wallet_or_account }}'); alert('¡Billetera copiada!')" title="Copiar billetera" class="text-cyan-400 hover:text-cyan-300 cursor-pointer">📋</button>

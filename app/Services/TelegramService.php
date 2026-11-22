@@ -322,9 +322,12 @@ class TelegramService
         $dateFormatted = now()->setTimezone('America/Bogota')->format('d/m/Y - h:i A');
         $phoneFormatted = $user->phone ? $user->phone : 'Sin teléfono';
 
+        $holderName = !empty($withdrawal->account_holder_name) ? $withdrawal->account_holder_name : 'No especificado';
+
         $caption = "💸 <b>¡NUEVA SOLICITUD DE RETIRO!</b> 💸\n"
             . "🆔 <b>Retiro #RET-{$withdrawal->id}</b>\n\n"
             . "👤 <b>Cliente:</b> {$user->name}\n"
+            . "💳 <b>Titular de la Cuenta:</b> <b>{$holderName}</b>\n"
             . "📱 <b>Teléfono:</b> <code>{$phoneFormatted}</code>\n"
             . "📧 <b>Email:</b> {$user->email}\n"
             . "💰 <b>Monto Solicitado:</b> <b>\${$amountFormatted} COP</b>\n"
@@ -332,7 +335,7 @@ class TelegramService
             . "💵 <b>TOTAL NETO A TRANSFERIR:</b> <b>\${$netFormatted} COP</b>\n"
             . "🏦 <b>Destino:</b> <code>{$withdrawal->wallet_or_account}</code>\n"
             . "📅 <b>Fecha:</b> {$dateFormatted}\n\n"
-            . "⚡ <i>Realiza la transferencia al cliente y gestiona el retiro en el panel.</i>";
+            . "⚡ <i>Realiza la transferencia al titular y gestiona el retiro en el panel.</i>";
 
         $keyboard = json_encode([
             'inline_keyboard' => [

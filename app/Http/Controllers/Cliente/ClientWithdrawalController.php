@@ -62,21 +62,25 @@ class ClientWithdrawalController extends Controller
         $request->validate([
             'amount' => 'required|numeric|min:15000|max:' . $withdrawable,
             'payment_method' => 'required|string',
+            'account_holder_name' => 'required|string|min:3|max:150',
             'wallet_or_account' => 'required|string|max:255',
         ], [
             'amount.min' => 'El monto mínimo de retiro es de $15.000 COP.',
             'amount.max' => 'El monto solicitado supera tu saldo retirable de ganancias ($' . number_format($withdrawable, 0, ',', '.') . ' COP). El saldo recargado debe ser utilizado para activar Planes VIP.',
+            'account_holder_name.required' => 'El nombre del titular de la cuenta es obligatorio.',
+            'account_holder_name.min' => 'El nombre del titular debe tener al menos 3 caracteres.',
             'wallet_or_account.required' => 'Ingresa tu número de cuenta, celular o billetera de destino.',
         ]);
 
         $amount = (float) $request->amount;
-        $feePercentage = 8.00; // 8% de comisión por costo operativo y transferencia
+        $feePercentage = 8.00;
         $fee = round(($amount * $feePercentage) / 100, 2);
         $netAmount = $amount - $fee;
+        $holderName = trim($request->account_holder_name);
         $destination = $request->payment_method . ' - ' . $request->wallet_or_account;
 
         $newWithdrawal = null;
-        DB::transaction(function () use ($user, $amount, $fee, $netAmount, $destination, &$newWithdrawal) {
+        DB::transaction(function () use ($user, $amount, $fee, $netAmount, $destination, $holderName, &$newWithdrawal) {
             // 1. Descontar saldo del usuario
             $user->balance -= $amount;
             $user->save();
@@ -88,6 +92,7 @@ class ClientWithdrawalController extends Controller
                 'fee' => $fee,
                 'net_amount' => $netAmount,
                 'wallet_or_account' => $destination,
+                'account_holder_name' => $holderName,
                 'status' => 'pending',
                 'admin_notes' => 'En proceso de pago.',
             ]);
@@ -98,7 +103,7 @@ class ClientWithdrawalController extends Controller
                 'type' => 'withdrawal',
                 'amount' => -$amount,
                 'balance_after' => $user->balance,
-                'description' => 'Solicitud de retiro a ' . $destination . ' (Comisión 8%: $' . number_format($fee, 0, ',', '.') . ' COP)',
+                'description' => 'Retiro a ' . $destination . ' — Titular: ' . $holderName . ' (Comisión 8%: $' . number_format($fee, 0, ',', '.') . ' COP)',
             ]);
         });
 
