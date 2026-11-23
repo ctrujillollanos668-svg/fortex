@@ -59,21 +59,21 @@ class RewardController extends Controller
             }
 
             // Premios en pesos colombianos ($ COP) perfectamente sincronizados con la ruleta visual:
-            // 0: $1.000 (25%)
-            // 1: $2.000 (22%)
+            // 0: $1.000 (26%)
+            // 1: $2.000 (23%)
             // 2: $5.000 (10%)
-            // 3: $9.000 (3%)
-            // 4: $500 (20%)
-            // 5: 👑 $13.000 (1% - Premio Mayor)
+            // 3: $9.000 (0% - NUNCA SALE)
+            // 4: $500 (22%)
+            // 5: 👑 $13.000 (0% - NUNCA SALE)
             // 6: $3.000 (7%)
             // 7: $1.000 (12%)
             $prizes = [
-                0 => ['amount' => 1000,  'weight' => 250],
-                1 => ['amount' => 2000,  'weight' => 220],
+                0 => ['amount' => 1000,  'weight' => 260],
+                1 => ['amount' => 2000,  'weight' => 230],
                 2 => ['amount' => 5000,  'weight' => 100],
-                3 => ['amount' => 9000,  'weight' => 30],
-                4 => ['amount' => 500,   'weight' => 200],
-                5 => ['amount' => 13000, 'weight' => 10], // 👑 Premio Mayor VIP
+                3 => ['amount' => 9000,  'weight' => 0],   // Desactivado: NUNCA sale
+                4 => ['amount' => 500,   'weight' => 220],
+                5 => ['amount' => 13000, 'weight' => 0],   // Desactivado: NUNCA sale
                 6 => ['amount' => 3000,  'weight' => 70],
                 7 => ['amount' => 1000,  'weight' => 120],
             ];
@@ -89,6 +89,11 @@ class RewardController extends Controller
                     $selectedSegment = $index;
                     break;
                 }
+            }
+
+            // Bloqueo de seguridad definitivo: Garantizar que NUNCA caiga en 9.000 ni en 13.000
+            if (in_array($selectedSegment, [3, 5]) || in_array($prizes[$selectedSegment]['amount'], [9000, 13000])) {
+                $selectedSegment = 0; // Se desvía automáticamente al premio de $1.000 COP
             }
 
             $wonAmount = $prizes[$selectedSegment]['amount'];
