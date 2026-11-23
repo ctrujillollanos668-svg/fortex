@@ -32,6 +32,80 @@ class AdminUserController extends Controller
         return view('admin.users.index', compact('users', 'search', 'totalBalance'));
     }
 
+    public function detail($id)
+    {
+        $user = User::with([
+            'sponsor',
+            'userPlans.plan',
+            'deposits' => fn($q) => $q->latest()->limit(20),
+            'withdrawals' => fn($q) => $q->latest()->limit(20),
+            'transactions' => fn($q) => $q->latest()->limit(35),
+        ])->findOrFail($id);
+
+        return response()->json([
+            'success' => true,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone ?: 'Sin teléfono',
+                'referral_code' => $user->referral_code,
+                'sponsor_name' => $user->sponsor ? $user->sponsor->name : 'Sin patrocinador (Directo)',
+                'balance' => (float) $user->balance,
+                'total_deposited' => (float) $user->totalDeposited(),
+                'total_spent_on_plans' => (float) $user->totalDepositSpentOnPlans(),
+                'recharge_balance' => (float) $user->rechargeBalance(),
+                'earnings_balance' => (float) $user->earningsBalance(),
+                'withdrawable_balance' => (float) $user->withdrawableBalance(),
+                'roulette_spins' => (int) ($user->roulette_spins ?? 0),
+                'plans' => $user->userPlans->map(function ($up) {
+                    return [
+                        'name' => $up->plan ? $up->plan->name : 'Plan',
+                        'invested_amount' => (float) $up->invested_amount,
+                        'daily_earning' => (float) $up->daily_earning,
+                        'earned_so_far' => (float) $up->earned_so_far,
+                        'max_earning' => (float) $up->max_earning,
+                        'status' => $up->status,
+                        'created_at' => $up->created_at ? $up->created_at->format('d/m/Y - h:i A') : '-',
+                        'last_claimed_at' => $up->last_claimed_at ? $up->last_claimed_at->format('d/m/Y - h:i A') : 'Nunca',
+                    ];
+                }),
+                'deposits' => $user->deposits->map(function ($d) {
+                    return [
+                        'id' => $d->id,
+                        'amount' => (float) $d->amount,
+                        'payment_method' => $d->payment_method,
+                        'transaction_hash' => $d->transaction_hash,
+                        'status' => $d->status,
+                        'created_at' => $d->created_at ? $d->created_at->format('d/m/Y - h:i A') : '-',
+                    ];
+                }),
+                'withdrawals' => $user->withdrawals->map(function ($w) {
+                    return [
+                        'id' => $w->id,
+                        'amount' => (float) $w->amount,
+                        'fee' => (float) $w->fee,
+                        'net_amount' => (float) $w->net_amount,
+                        'account_holder_name' => $w->account_holder_name ?: 'No especificado',
+                        'wallet_or_account' => $w->wallet_or_account,
+                        'status' => $w->status,
+                        'created_at' => $w->created_at ? $w->created_at->format('d/m/Y - h:i A') : '-',
+                    ];
+                }),
+                'transactions' => $user->transactions->map(function ($t) {
+                    return [
+                        'id' => $t->id,
+                        'type' => $t->type,
+                        'amount' => (float) $t->amount,
+                        'balance_after' => (float) $t->balance_after,
+                        'description' => $t->description,
+                        'created_at' => $t->created_at ? $t->created_at->format('d/m/Y - h:i A') : '-',
+                    ];
+                }),
+            ]
+        ]);
+    }
+
     public function adjustBalance(Request $request, $id)
     {
         $user = User::findOrFail($id);

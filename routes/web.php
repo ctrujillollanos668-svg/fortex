@@ -82,6 +82,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 
     // Gestión de Usuarios / Clientes
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+    Route::get('/users/{id}/detail', [AdminUserController::class, 'detail'])->name('users.detail');
     Route::post('/users/{id}/adjust-balance', [AdminUserController::class, 'adjustBalance'])->name('users.adjustBalance');
     Route::post('/users/{id}/toggle-status', [AdminUserController::class, 'toggleStatus'])->name('users.toggleStatus');
     Route::post('/users/{id}/password', [AdminUserController::class, 'updatePassword'])->name('users.updatePassword');
