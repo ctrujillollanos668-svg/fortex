@@ -61,13 +61,13 @@ class ClientPlanController extends Controller
         $earningsBalance = $user->earningsBalance();
 
         if ($source === 'deposit') {
-            if ($rechargeBalance < $plan->price) {
-                return back()->with('error', 'Saldo de Recargas insuficiente ($' . number_format($rechargeBalance, 0, ',', '.') . ' COP disponibles). Necesitas $' . number_format($plan->price, 0, ',', '.') . ' COP de recarga o puedes usar tu Saldo de Ganancias si tienes disponible.');
+            if ($user->balance < $plan->price) {
+                return back()->with('error', 'Saldo insuficiente para activar el plan ($' . number_format($user->balance, 0, ',', '.') . ' COP disponibles). Necesitas $' . number_format($plan->price, 0, ',', '.') . ' COP.');
             }
         } else {
             // Re-inversión de ganancias
             if ($earningsBalance < $plan->price) {
-                return back()->with('error', 'Saldo de Ganancias insuficiente ($' . number_format($earningsBalance, 0, ',', '.') . ' COP disponibles). Necesitas $' . number_format($plan->price, 0, ',', '.') . ' COP de ganancias acumuladas para re-invertir.');
+                return back()->with('error', 'Saldo de Ganancias insuficiente ($' . number_format($earningsBalance, 0, ',', '.') . ' COP disponibles de ganancias generadas por planes). Necesitas $' . number_format($plan->price, 0, ',', '.') . ' COP de ganancias acumuladas para re-invertir, o puedes activar seleccionando saldo de recarga/bonos.');
             }
         }
 

@@ -53,8 +53,8 @@ class ClientWithdrawalController extends Controller
         if ($withdrawable < 15000) {
             $uninvested = $user->uninvestedDeposit();
             $msg = $uninvested > 0
-                ? 'No puedes retirar saldo de recargas directamente ($' . number_format($uninvested, 0, ',', '.') . ' COP). Este saldo debe ser invertido en Planes VIP para generar ganancias. Podrás retirar los rendimientos diarios y comisiones obtenidas una vez alcances el mínimo de $15.000 COP.'
-                : 'Tu saldo retirable de ganancias actual es de $' . number_format($withdrawable, 0, ',', '.') . ' COP. El monto mínimo para retirar es de $15.000 COP.';
+                ? 'El saldo de recargas y los premios de la Ruleta VIP ($' . number_format($uninvested, 0, ',', '.') . ' COP) son exclusivos para activar Planes VIP. Para retirar, debes generar ganancias a través de tus planes activos o comisiones de referidos (mínimo de retiro: $15.000 COP). Tu saldo retirable actual de ganancias de planes es de $' . number_format($withdrawable, 0, ',', '.') . ' COP.'
+                : 'Tu saldo retirable de ganancias generadas por planes es de $' . number_format($withdrawable, 0, ',', '.') . ' COP. El monto mínimo para retirar es de $15.000 COP.';
 
             return back()->with('error', $msg);
         }
@@ -66,7 +66,7 @@ class ClientWithdrawalController extends Controller
             'wallet_or_account' => 'required|string|max:255',
         ], [
             'amount.min' => 'El monto mínimo de retiro es de $15.000 COP.',
-            'amount.max' => 'El monto solicitado supera tu saldo retirable de ganancias ($' . number_format($withdrawable, 0, ',', '.') . ' COP). El saldo recargado debe ser utilizado para activar Planes VIP.',
+            'amount.max' => 'El monto solicitado supera tu saldo retirable de ganancias ($' . number_format($withdrawable, 0, ',', '.') . ' COP). El saldo de recargas y los premios de la Ruleta VIP deben ser invertidos en Planes VIP para generar rendimientos.',
             'account_holder_name.required' => 'El nombre del titular de la cuenta es obligatorio.',
             'account_holder_name.min' => 'El nombre del titular debe tener al menos 3 caracteres.',
             'wallet_or_account.required' => 'Ingresa tu número de cuenta, celular o billetera de destino.',

@@ -132,43 +132,97 @@ class User extends Authenticatable
     }
 
     /**
-     * Saldo de recargas disponible exclusivamente para comprar planes VIP.
+     * Total de ganancias generadas por reclamos diarios de Planes VIP.
      */
-    public function rechargeBalance(): float
+    public function totalPlanEarnings(): float
     {
-        $deposited = $this->totalDeposited();
-        $spent = $this->totalDepositSpentOnPlans();
-        $remaining = max(0, round($deposited - $spent, 2));
-
-        return min((float) $this->balance, $remaining);
+        return (float) $this->transactions()
+            ->where('type', 'daily_claim')
+            ->sum('amount');
     }
 
     /**
-     * Saldo de ganancias acumuladas (rendimientos diarios, comisiones de referidos,
-     * premios de ruleta y bonos).
-     * Este saldo se puede retirar o re-invertir en nuevos planes VIP.
+     * Total de comisiones ganadas por referidos (Nivel 1 y Nivel 2).
      */
-    public function earningsBalance(): float
+    public function totalReferralEarnings(): float
     {
-        $currentBalance = (float) $this->balance;
-        $recharge = $this->rechargeBalance();
-
-        return max(0, round($currentBalance - $recharge, 2));
+        return (float) $this->transactions()
+            ->where('type', 'referral_commission')
+            ->sum('amount');
     }
 
     /**
-     * Saldo de recarga que aún no ha sido invertido en planes VIP.
+     * Total histórico de ganancias netas retirables ganadas por el usuario.
+     * (Planes VIP + Comisiones de Red).
+     * Los premios de la Ruleta VIP, sobres rojos y recargas NO cuentan aquí
+     * porque son saldo exclusivo para comprar e invertir en planes.
      */
-    public function uninvestedDeposit(): float
+    public function totalRealEarnings(): float
     {
-        return $this->rechargeBalance();
+        return round($this->totalPlanEarnings() + $this->totalReferralEarnings(), 2);
     }
 
     /**
-     * Saldo retirable: Únicamente las ganancias obtenidas.
+     * Total de ganancias que ya han sido retiradas o solicitadas para retiro.
+     */
+    public function totalEarningsWithdrawn(): float
+    {
+        return (float) abs($this->withdrawals()
+            ->whereIn('status', ['approved', 'pending'])
+            ->sum('amount'));
+    }
+
+    /**
+     * Total de ganancias que el usuario decidió re-invertir en la compra de nuevos planes.
+     */
+    public function totalEarningsReinvested(): float
+    {
+        return (float) abs($this->transactions()
+            ->where('type', 'plan_purchase_earnings')
+            ->sum('amount'));
+    }
+
+    /**
+     * Saldo Retirable Oficial:
+     * Únicamente las ganancias generadas por Planes VIP y Comisiones de Referidos,
+     * descontando lo que ya se retiró o re-invirtió.
+     * La Ruleta VIP, bonos y recargas quedan 100% blindados exclusivamente para comprar planes.
      */
     public function withdrawableBalance(): float
     {
-        return $this->earningsBalance();
+        $realEarnings = $this->totalRealEarnings();
+        $withdrawn = $this->totalEarningsWithdrawn();
+        $reinvested = $this->totalEarningsReinvested();
+
+        $remainingEarnings = max(0, round($realEarnings - $withdrawn - $reinvested, 2));
+
+        return min((float) $this->balance, $remainingEarnings);
+    }
+
+    /**
+     * Saldo no retirable (saldo de recargas + premios de ruleta + bonos que deben ser invertidos en planes).
+     */
+    public function uninvestedDeposit(): float
+    {
+        $currentBalance = (float) $this->balance;
+        $withdrawable = $this->withdrawableBalance();
+
+        return max(0, round($currentBalance - $withdrawable, 2));
+    }
+
+    /**
+     * Saldo de recargas y bonos disponibles para comprar planes VIP.
+     */
+    public function rechargeBalance(): float
+    {
+        return $this->uninvestedDeposit();
+    }
+
+    /**
+     * Saldo de ganancias acumuladas retirable.
+     */
+    public function earningsBalance(): float
+    {
+        return $this->withdrawableBalance();
     }
 }
