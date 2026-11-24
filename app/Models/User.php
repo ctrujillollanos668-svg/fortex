@@ -205,15 +205,23 @@ class User extends Authenticatable
 
     /**
      * Saldo Retirable Oficial:
-     * Todo el saldo generado por reclamos diarios de Planes VIP y comisiones de referidos.
-     * Las recargas y ruleta no invertidas quedan descontadas.
+     * Únicamente lo que el usuario ha reclamado en sus Planes VIP y lo que ha ganado en comisiones de red.
+     * La Ruleta VIP, bonos y recargas tienen 0% derecho a retiro y quedan estrictamente bloqueados.
      */
     public function withdrawableBalance(): float
     {
         $currentBalance = (float) $this->balance;
         $locked = $this->uninvestedDeposit();
 
-        $withdrawable = max(0, round($currentBalance - $locked, 2));
+        // 1. Descontar todo saldo de recargas, ruleta o bonos que aún no se haya invertido en planes
+        $afterLocked = max(0, round($currentBalance - $locked, 2));
+
+        // 2. Candado estricto: Solo se puede retirar lo que proviene de planes reclamados y comisiones de referidos
+        $totalEarnedFromPlans = (float) $this->totalPlanEarnings();
+        $totalEarnedFromReferrals = (float) $this->totalReferralEarnings();
+        $maxAllowedEarnings = round($totalEarnedFromPlans + $totalEarnedFromReferrals, 2);
+
+        $withdrawable = min($afterLocked, $maxAllowedEarnings);
 
         return min($currentBalance, $withdrawable);
     }
