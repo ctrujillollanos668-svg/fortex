@@ -122,23 +122,39 @@ class User extends Authenticatable
     }
 
     /**
-     * Total dinero de recarga que ha sido consumido para comprar planes VIP.
+     * Total dinero invertido en la compra y activación de Planes VIP.
+     */
+    public function totalSpentOnPlans(): float
+    {
+        $fromPlans = (float) $this->userPlans()->sum('invested_amount');
+        $fromTx = (float) abs($this->transactions()
+            ->whereIn('type', ['plan_purchase', 'plan_purchase_deposit', 'plan_purchase_earnings'])
+            ->sum('amount'));
+
+        return max($fromPlans, $fromTx);
+    }
+
+    /**
+     * Compatibilidad hacia atrás.
      */
     public function totalDepositSpentOnPlans(): float
     {
-        return (float) abs($this->transactions()
-            ->whereIn('type', ['plan_purchase', 'plan_purchase_deposit'])
-            ->sum('amount'));
+        return $this->totalSpentOnPlans();
     }
 
     /**
      * Total de ganancias generadas por reclamos diarios de Planes VIP.
+     * Verifica tanto la tabla de user_plans como el libro contable de transacciones.
      */
     public function totalPlanEarnings(): float
     {
-        return (float) $this->transactions()
+        $fromTx = (float) $this->transactions()
             ->where('type', 'daily_claim')
             ->sum('amount');
+
+        $fromPlans = (float) $this->userPlans()->sum('earned_so_far');
+
+        return max($fromTx, $fromPlans);
     }
 
     /**
@@ -146,76 +162,60 @@ class User extends Authenticatable
      */
     public function totalReferralEarnings(): float
     {
-        return (float) $this->transactions()
+        $fromTx = (float) $this->transactions()
             ->where('type', 'referral_commission')
+            ->sum('amount');
+
+        $fromComm = (float) $this->commissionsReceived()->sum('amount');
+
+        return max($fromTx, $fromComm);
+    }
+
+    /**
+     * Total histórico de bonos no retirables recibidos (Ruleta VIP, sobres rojos, códigos promocionales).
+     */
+    public function totalBonusReceived(): float
+    {
+        return (float) $this->transactions()
+            ->whereIn('type', ['roulette_reward', 'promo_code', 'welcome_bonus'])
             ->sum('amount');
     }
 
     /**
-     * Total histórico de ganancias netas retirables ganadas por el usuario.
-     * (Planes VIP + Comisiones de Red).
-     * Los premios de la Ruleta VIP, sobres rojos y recargas NO cuentan aquí
-     * porque son saldo exclusivo para comprar e invertir en planes.
-     */
-    public function totalRealEarnings(): float
-    {
-        return round($this->totalPlanEarnings() + $this->totalReferralEarnings(), 2);
-    }
-
-    /**
-     * Total de ganancias que ya han sido retiradas o solicitadas para retiro.
-     */
-    public function totalEarningsWithdrawn(): float
-    {
-        return (float) abs($this->withdrawals()
-            ->whereIn('status', ['approved', 'pending'])
-            ->sum('amount'));
-    }
-
-    /**
-     * Total de ganancias que el usuario decidió re-invertir en la compra de nuevos planes.
-     */
-    public function totalEarningsReinvested(): float
-    {
-        return (float) abs($this->transactions()
-            ->where('type', 'plan_purchase_earnings')
-            ->sum('amount'));
-    }
-
-    /**
-     * Saldo Retirable Oficial:
-     * Únicamente las ganancias generadas por Planes VIP y Comisiones de Referidos,
-     * descontando lo que ya se retiró o re-invirtió.
-     * La Ruleta VIP, bonos y recargas quedan 100% blindados exclusivamente para comprar planes.
-     */
-    public function withdrawableBalance(): float
-    {
-        $realEarnings = $this->totalRealEarnings();
-        $withdrawn = $this->totalEarningsWithdrawn();
-        $reinvested = $this->totalEarningsReinvested();
-
-        $remainingEarnings = max(0, round($realEarnings - $withdrawn - $reinvested, 2));
-
-        return min((float) $this->balance, $remainingEarnings);
-    }
-
-    /**
-     * Saldo no retirable (saldo de recargas + premios de ruleta + bonos que deben ser invertidos en planes).
+     * Saldo de recargas y bonos que aún NO han sido invertidos en Planes VIP.
+     * Este saldo queda 100% blindado para comprar planes y NO se puede retirar.
      */
     public function uninvestedDeposit(): float
     {
-        $currentBalance = (float) $this->balance;
-        $withdrawable = $this->withdrawableBalance();
+        $totalLockedReceived = $this->totalDeposited() + $this->totalBonusReceived();
+        $totalSpent = $this->totalSpentOnPlans();
 
-        return max(0, round($currentBalance - $withdrawable, 2));
+        $remainingLocked = max(0, round($totalLockedReceived - $totalSpent, 2));
+
+        return min((float) $this->balance, $remainingLocked);
     }
 
     /**
-     * Saldo de recargas y bonos disponibles para comprar planes VIP.
+     * Saldo disponible exclusivamente para comprar planes VIP.
      */
     public function rechargeBalance(): float
     {
         return $this->uninvestedDeposit();
+    }
+
+    /**
+     * Saldo Retirable Oficial:
+     * Todo el saldo generado por reclamos diarios de Planes VIP y comisiones de referidos.
+     * Las recargas y ruleta no invertidas quedan descontadas.
+     */
+    public function withdrawableBalance(): float
+    {
+        $currentBalance = (float) $this->balance;
+        $locked = $this->uninvestedDeposit();
+
+        $withdrawable = max(0, round($currentBalance - $locked, 2));
+
+        return min($currentBalance, $withdrawable);
     }
 
     /**
