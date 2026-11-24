@@ -192,45 +192,7 @@
         @endif
     </div>
 
-    <!-- Lista de Referidos de Segundo Nivel (Nivel 2) -->
-    @if($level2Referrals->isNotEmpty())
-        <div class="bg-slate-900/60 border border-slate-800 rounded-3xl p-4 sm:p-5">
-            <div class="flex items-center justify-between mb-3">
-                <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                    <span>🥈</span> Invitados de tu Red (Nivel 2 - 2%)
-                </h3>
-                <span class="text-xs text-cyan-400 font-mono">{{ $level2Referrals->count() }} personas</span>
-            </div>
-
-            <div class="divide-y divide-slate-800/80">
-                @foreach($level2Referrals as $ref2)
-                    <div class="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-                        <div>
-                            <p class="font-bold text-white">{{ $ref2->name }}</p>
-                            <p class="text-[10px] text-slate-400">Invitado por: <span class="text-cyan-400 font-semibold">{{ $ref2->sponsor->name ?? 'Miembro de tu equipo' }}</span></p>
-                        </div>
-                        <div class="flex items-center justify-between sm:justify-end gap-3 text-right">
-                            <span class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-mono text-[10px]">
-                                {{ $ref2->plans_count }} plan(es)
-                            </span>
-                            <div class="text-right">
-                                @if($ref2->commission_generated > 0)
-                                    <span class="text-cyan-400 font-mono font-black text-xs block">
-                                        +${{ number_format($ref2->commission_generated, 0, ',', '.') }} COP
-                                    </span>
-                                    <span class="text-[9px] text-cyan-500 block">Comisión Nivel 2 (2%)</span>
-                                @else
-                                    <span class="text-slate-500 font-mono text-xs block">$0 COP</span>
-                                    <span class="text-[9px] text-slate-500 block">Sin recarga aún</span>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    @endif
-
+    <!-- Fin de Lista de Directos -->
 </div>
 
 <script>
