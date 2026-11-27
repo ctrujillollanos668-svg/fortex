@@ -21,6 +21,27 @@ Route::get('/', function () {
     return app(\App\Http\Controllers\DashboardController::class)->index();
 })->name('home');
 
+Route::get('/version.json', function () {
+    return response()->json([
+        'version_code' => 1,
+        'version_name' => '1.0.0',
+        'force_update' => false,
+        'title' => '¡Actualización Disponible! 🚀',
+        'message' => 'Hemos lanzado una nueva versión de Fortex con mejoras de velocidad, rendimiento y nuevas funciones.',
+        'download_url' => 'https://fortex.wasmer.app/Fortex.apk',
+    ]);
+});
+
+Route::get('/Fortex.apk', function () {
+    $path = public_path('Fortex.apk');
+    if (file_exists($path)) {
+        return response()->download($path, 'Fortex.apk', [
+            'Content-Type' => 'application/vnd.android.package-archive',
+        ]);
+    }
+    abort(404);
+});
+
 // Rutas de Cliente
 Route::middleware(['auth'])->group(function () {
     // Dashboard Principal
