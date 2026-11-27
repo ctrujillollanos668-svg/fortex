@@ -42,6 +42,9 @@ Route::get('/Fortex.apk', function () {
     abort(404);
 });
 
+// Cargar rutas API garantizadas
+Route::prefix('api')->group(base_path('routes/api.php'));
+
 // Rutas de Cliente
 Route::middleware(['auth'])->group(function () {
     // Dashboard Principal
