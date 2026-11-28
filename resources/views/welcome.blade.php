@@ -75,11 +75,6 @@
 </head>
 <body class="text-slate-100 selection:bg-emerald-500 selection:text-black overflow-x-hidden @auth pb-20 md:pb-0 @endauth">
 
-    <!-- Luces Ambientales de Fondo -->
-    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-[900px] h-[550px] bg-emerald-500/15 rounded-full blur-[150px] pointer-events-none -z-10"></div>
-    <div class="fixed top-1/2 -right-48 w-[700px] h-[700px] bg-cyan-500/10 rounded-full blur-[180px] pointer-events-none -z-10"></div>
-    <div class="fixed bottom-0 -left-48 w-[700px] h-[700px] bg-amber-500/10 rounded-full blur-[180px] pointer-events-none -z-10"></div>
-
     <!-- Ticker de Pagos y Notificaciones en Vivo -->
     <div class="bg-slate-950/90 border-b border-slate-800/80 py-2.5 overflow-hidden text-xs backdrop-blur-md sticky top-0 z-50">
         <div class="animate-marquee whitespace-nowrap flex items-center gap-10 text-slate-400">
@@ -112,11 +107,7 @@
 
             <!-- Menú Central -->
             <nav class="hidden lg:flex items-center gap-8 text-sm font-semibold text-slate-300">
-                <a href="#como-funciona" class="hover:text-emerald-400 transition">Cómo Funciona</a>
-                <a href="#piramide" class="hover:text-emerald-400 transition">Pirámide de Red</a>
                 <a href="#planes" class="hover:text-emerald-400 transition">Membresías VIP</a>
-                <a href="#calculadora" class="hover:text-emerald-400 transition">Calculadora</a>
-                <a href="#faq" class="hover:text-emerald-400 transition">Preguntas</a>
             </nav>
 
             <!-- Menú de Acciones: Autenticado vs Invitado -->
@@ -321,8 +312,8 @@
                     <button onclick="openAuthModal('register')" class="w-full sm:w-auto px-9 py-4 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-extrabold rounded-2xl shadow-xl shadow-emerald-500/30 transition-all duration-300 transform hover:-translate-y-1 text-center text-base flex items-center justify-center gap-2 cursor-pointer">
                         <span>⚡</span> Abrir Mi Cuenta Ahora (Gratis)
                     </button>
-                    <a href="#calculadora" class="w-full sm:w-auto px-8 py-4 bg-slate-900/90 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-200 font-bold rounded-2xl transition text-center text-base flex items-center justify-center gap-2">
-                        <span>🧮</span> Simular Ganancias
+                    <a href="#planes" class="w-full sm:w-auto px-8 py-4 bg-slate-900/90 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-200 font-bold rounded-2xl transition text-center text-base flex items-center justify-center gap-2">
+                        <span>💎</span> Ver Paquetes VIP
                     </a>
                 </div>
             @endauth
@@ -342,115 +333,8 @@
                     <p class="text-xs text-amber-400 font-semibold mt-1">Retiros Rápidos en COP</p>
                 </div>
                 <div class="bg-slate-900/70 border border-slate-800/80 rounded-2xl p-5 backdrop-blur-sm hover:border-purple-500/40 transition">
-                    <p class="text-3xl font-extrabold text-white font-mono">$10.000</p>
+                    <p class="text-3xl font-extrabold text-white font-mono">$15.000</p>
                     <p class="text-xs text-purple-400 font-semibold mt-1">Mínimo de Entrada COP</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- SECCIÓN: CÓMO FUNCIONA EN 3 PASOS -->
-    <section id="como-funciona" class="py-20 bg-slate-950/90 border-t border-slate-900">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-2xl mx-auto mb-16">
-                <span class="px-3.5 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full text-xs font-bold uppercase tracking-wider">
-                    Sencillo y Transparente
-                </span>
-                <h2 class="text-3xl sm:text-4xl font-extrabold text-white mt-3">
-                    Empieza a ganar en <span class="gradient-text">3 Simples Pasos</span>
-                </h2>
-                <p class="text-slate-400 text-sm mt-2">Todo el proceso es automatizado y toma menos de 2 minutos.</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Paso 1 -->
-                <div class="bg-slate-900/50 border border-slate-800 rounded-3xl p-7 relative hover:border-emerald-500/40 transition duration-300">
-                    <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-2xl font-extrabold mb-5">
-                        1
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-2">Crea tu Cuenta Gratis</h3>
-                    <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                        Regístrate con tu correo o número de celular en 30 segundos y activa tu código de invitación.
-                    </p>
-                </div>
-
-                <!-- Paso 2 -->
-                <div class="bg-slate-900/50 border border-slate-800 rounded-3xl p-7 relative hover:border-cyan-500/40 transition duration-300">
-                    <div class="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 flex items-center justify-center text-2xl font-extrabold mb-5">
-                        2
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-2">Elige tu Paquete VIP</h3>
-                    <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                        Recarga fácilmente por Nequi o Daviplata (desde $10.000 COP) y activa tu membresía para ganar todos los días.
-                    </p>
-                </div>
-
-                <!-- Paso 3 -->
-                <div class="bg-slate-900/50 border border-slate-800 rounded-3xl p-7 relative hover:border-amber-500/40 transition duration-300">
-                    <div class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center text-2xl font-extrabold mb-5">
-                        3
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-2">Cobra y Retira a tu Nequi</h3>
-                    <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                        Reclama tus ganancias cada 24 horas y solicita tus retiros directos a tu cuenta cuando quieras.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- SECCIÓN VISUAL DE LA PIRÁMIDE (ESTRUCTURA DE RED) -->
-    <section id="piramide" class="py-24 bg-gradient-to-b from-slate-950 via-slate-900/50 to-slate-950 border-y border-slate-900 relative">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-2xl mx-auto mb-16">
-                <span class="px-3.5 py-1 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 rounded-full text-xs font-bold uppercase tracking-wider">
-                    Sistema de Referidos
-                </span>
-                <h2 class="text-3xl sm:text-5xl font-extrabold text-white mt-3">
-                    Tu <span class="gradient-text">Pirámide de Comisiones</span>
-                </h2>
-                <p class="text-slate-400 text-sm sm:text-base mt-3">
-                    Construye un equipo y multiplica tus ganancias con nuestro árbol de 3 niveles continuos.
-                </p>
-            </div>
-
-            <!-- Gráfico Escalonado de la Pirámide -->
-            <div class="max-w-3xl mx-auto space-y-4">
-                <!-- Nivel Cúspide: TÚ -->
-                <div class="pyramid-card mx-auto w-11/12 sm:w-2/5 bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 text-slate-950 p-5 rounded-2xl glow-gold text-center font-extrabold cursor-pointer transition-all duration-300">
-                    <div class="text-2xl mb-1">👑</div>
-                    <div class="text-lg uppercase tracking-wider font-black">TÚ (Líder / Cúspide)</div>
-                    <div class="text-xs font-semibold opacity-95">Cobras de los 3 niveles inferiores en tiempo real</div>
-                </div>
-
-                <!-- Nivel 1: Directos -->
-                <div class="pyramid-card mx-auto w-full sm:w-3/5 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 text-white p-5 rounded-2xl glow-emerald text-center font-bold cursor-pointer transition-all duration-300">
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-xs uppercase tracking-widest bg-black/40 px-3 py-1 rounded-full font-extrabold">Nivel 1</span>
-                        <span class="text-xl font-extrabold bg-white/20 px-3.5 py-1 rounded-xl">10% Directo</span>
-                    </div>
-                    <div class="text-base sm:text-lg font-extrabold">Tus Invitados Directos</div>
-                    <div class="text-xs text-emerald-100 font-normal mt-0.5">Recibes el 10% instantáneo de cada recarga que realicen con tu link.</div>
-                </div>
-
-                <!-- Nivel 2: Indirectos -->
-                <div class="pyramid-card mx-auto w-full sm:w-4/5 bg-gradient-to-r from-cyan-600 via-cyan-500 to-blue-600 text-white p-5 rounded-2xl glow-cyan text-center font-bold cursor-pointer transition-all duration-300">
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-xs uppercase tracking-widest bg-black/40 px-3 py-1 rounded-full font-extrabold">Nivel 2</span>
-                        <span class="text-xl font-extrabold bg-white/20 px-3.5 py-1 rounded-xl">5% Comisión</span>
-                    </div>
-                    <div class="text-base sm:text-lg font-extrabold">Invitados de tus Invitados</div>
-                    <div class="text-xs text-cyan-100 font-normal mt-0.5">Ganas el 5% de cada persona que tus amigos inviten sin esfuerzo extra.</div>
-                </div>
-
-                <!-- Nivel 3: Base de la red -->
-                <div class="pyramid-card mx-auto w-full bg-gradient-to-r from-purple-700 via-indigo-600 to-blue-700 text-white p-5 rounded-2xl shadow-xl shadow-purple-500/20 text-center font-bold cursor-pointer transition-all duration-300">
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-xs uppercase tracking-widest bg-black/40 px-3 py-1 rounded-full font-extrabold">Nivel 3</span>
-                        <span class="text-xl font-extrabold bg-white/20 px-3.5 py-1 rounded-xl">2% Comisión</span>
-                    </div>
-                    <div class="text-base sm:text-lg font-extrabold">Comunidad y Red Profunda</div>
-                    <div class="text-xs text-purple-100 font-normal mt-0.5">El volumen masivo de toda la base te sigue pagando comisiones acumulativas.</div>
                 </div>
             </div>
         </div>
@@ -539,108 +423,6 @@
                     <p>No hay ofertas de planes disponibles en este momento.</p>
                 </div>
             @endif
-        </div>
-    </section>
-
-    <!-- CALCULADORA INTERACTIVA DE GANANCIAS -->
-    <section id="calculadora" class="py-20 bg-slate-950/80 border-t border-slate-900">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6">
-            <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-8 sm:p-12 shadow-2xl relative">
-                <div class="text-center max-w-xl mx-auto mb-8">
-                    <span class="text-3xl">🧮</span>
-                    <h2 class="text-2xl sm:text-4xl font-extrabold text-white mt-2">Calculadora de Ganancias COP</h2>
-                    <p class="text-xs sm:text-sm text-slate-400 mt-1">Mueve la barra y calcula exactamente cuánto dinero generarás cada día.</p>
-                </div>
-
-                <!-- Slider -->
-                <div class="space-y-4">
-                    <div class="flex justify-between items-center text-sm font-semibold">
-                        <span class="text-slate-400">Monto de Inversión:</span>
-                        <span id="amountDisplay" class="text-2xl sm:text-3xl font-extrabold text-emerald-400 font-mono">$50.000 COP</span>
-                    </div>
-
-                    <input id="calcSlider" type="range" min="10000" max="500000" step="10000" value="50000"
-                        class="w-full h-3 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500">
-                    
-                    <div class="flex justify-between text-[11px] text-slate-500 font-mono">
-                        <span>$10.000</span>
-                        <span>$100.000</span>
-                        <span>$250.000</span>
-                        <span>$500.000</span>
-                    </div>
-                </div>
-
-                <!-- Resultados en Tarjetas -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 pt-8 border-t border-slate-800">
-                    <div class="bg-slate-950/60 p-5 rounded-2xl border border-slate-800 text-center">
-                        <p class="text-xs text-slate-400 uppercase font-semibold">Ganancia Diaria</p>
-                        <p id="dailyResult" class="text-2xl sm:text-3xl font-extrabold text-white mt-1 font-mono">$3.000 COP</p>
-                        <span class="text-[10px] text-emerald-400 font-semibold">6% cada 24 horas</span>
-                    </div>
-                    <div class="bg-slate-950/60 p-5 rounded-2xl border border-slate-800 text-center">
-                        <p class="text-xs text-slate-400 uppercase font-semibold">Ganancia en 30 Días</p>
-                        <p id="monthlyResult" class="text-2xl sm:text-3xl font-extrabold text-cyan-400 mt-1 font-mono">$90.000 COP</p>
-                        <span class="text-[10px] text-cyan-400 font-semibold">Retorno Total</span>
-                    </div>
-                    <div class="bg-slate-950/60 p-5 rounded-2xl border border-slate-800 text-center">
-                        <p class="text-xs text-slate-400 uppercase font-semibold">Porcentaje de Retorno</p>
-                        <p id="roiResult" class="text-2xl sm:text-3xl font-extrabold text-amber-400 mt-1 font-mono">180%</p>
-                        <span class="text-[10px] text-amber-400 font-semibold">Tope Máximo Garantizado</span>
-                    </div>
-                </div>
-
-                <div class="mt-8 text-center">
-                    @auth
-                        <a href="#planes" class="inline-block px-9 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-black rounded-2xl text-sm shadow-lg shadow-emerald-500/25 transition cursor-pointer">
-                            Activar un Plan con este Retorno 🚀
-                        </a>
-                    @else
-                        <button onclick="openAuthModal('register')" class="px-9 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold rounded-2xl text-sm shadow-lg shadow-emerald-500/25 transition cursor-pointer">
-                            Comenzar con este Retorno 🚀
-                        </button>
-                    @endauth
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- PREGUNTAS FRECUENTES (FAQ) -->
-    <section id="faq" class="py-20 max-w-4xl mx-auto px-4 sm:px-6">
-        <div class="text-center mb-12">
-            <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Preguntas Frecuentes</h2>
-            <p class="text-slate-400 text-xs sm:text-sm mt-1">Todo lo que necesitas saber antes de comenzar.</p>
-        </div>
-
-        <div class="space-y-3.5">
-            <details class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 cursor-pointer group">
-                <summary class="font-bold text-sm sm:text-base text-white flex items-center justify-between">
-                    <span>¿Cómo se acreditan mis ganancias diarias?</span>
-                    <span class="text-emerald-400 text-xl group-open:rotate-45 transition-transform">+</span>
-                </summary>
-                <p class="text-xs sm:text-sm text-slate-400 mt-3 leading-relaxed">
-                    Cada 24 horas después de activar tu membresía, tu rendimiento se acredita a tu balance. Puedes entrar a tu panel de usuario y hacer clic en *"Reclamar Ganancia de Hoy"* para recibirlo al instante.
-                </p>
-            </details>
-
-            <details class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 cursor-pointer group">
-                <summary class="font-bold text-sm sm:text-base text-white flex items-center justify-between">
-                    <span>¿Cómo gano comisiones con mi enlace de referidos?</span>
-                    <span class="text-emerald-400 text-xl group-open:rotate-45 transition-transform">+</span>
-                </summary>
-                <p class="text-xs sm:text-sm text-slate-400 mt-3 leading-relaxed">
-                    Al registrarte obtienes un código de invitación único. Ganas el <strong>10%</strong> en Nivel 1 (invitados directos), <strong>5%</strong> en Nivel 2 y <strong>2%</strong> en Nivel 3 por cada recarga que ellos hagan.
-                </p>
-            </details>
-
-            <details class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 cursor-pointer group">
-                <summary class="font-bold text-sm sm:text-base text-white flex items-center justify-between">
-                    <span>¿Cuál es el monto mínimo para solicitar retiros?</span>
-                    <span class="text-emerald-400 text-xl group-open:rotate-45 transition-transform">+</span>
-                </summary>
-                <p class="text-xs sm:text-sm text-slate-400 mt-3 leading-relaxed">
-                    El mínimo de retiro es de <strong>$15.000 COP</strong> y los pagos se envían a tu cuenta de Nequi, Daviplata o Bancolombia.
-                </p>
-            </details>
         </div>
     </section>
 
@@ -1005,26 +787,6 @@
             const supportNumber = "{{ env('SUPPORT_WHATSAPP', '573115138588') }}";
             const msg = encodeURIComponent(`Hola Soporte FORTEX 🟢, solicito recuperar la contraseña de mi cuenta registrada con el celular: ${fullPhone}`);
             window.open(`https://api.whatsapp.com/send?phone=${supportNumber}&text=${msg}`, '_blank');
-        }
-
-        // Calculadora
-        const slider = document.getElementById('calcSlider');
-        const amountDisplay = document.getElementById('amountDisplay');
-        const dailyResult = document.getElementById('dailyResult');
-        const monthlyResult = document.getElementById('monthlyResult');
-        const roiResult = document.getElementById('roiResult');
-
-        if (slider) {
-            slider.addEventListener('input', function() {
-                const amount = parseInt(this.value);
-                const daily = amount * 0.06;
-                const monthly = daily * 30;
-
-                amountDisplay.innerText = `$${amount.toLocaleString('es-CO')} COP`;
-                dailyResult.innerText = `$${daily.toLocaleString('es-CO')} COP`;
-                monthlyResult.innerText = `$${monthly.toLocaleString('es-CO')} COP`;
-                roiResult.innerText = '180%';
-            });
         }
 
         // Contador de 24 Horas en Vivo
