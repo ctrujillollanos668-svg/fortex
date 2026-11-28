@@ -114,11 +114,13 @@ class User extends Authenticatable
     }
 
     /**
-     * Total dinero recargado y aprobado en el sistema.
+     * Total dinero recargado y aprobado en el sistema (incluyendo depósitos aprobados y saldo acreditado por admin).
      */
     public function totalDeposited(): float
     {
-        return (float) $this->deposits()->where('status', 'approved')->sum('amount');
+        $approvedDeposits = (float) $this->deposits()->where('status', 'approved')->sum('amount');
+        $adminCredits = (float) $this->transactions()->where('type', 'admin_credit')->where('amount', '>', 0)->sum('amount');
+        return round($approvedDeposits + $adminCredits, 2);
     }
 
     /**

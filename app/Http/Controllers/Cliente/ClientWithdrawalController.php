@@ -29,9 +29,12 @@ class ClientWithdrawalController extends Controller
         $uninvestedDeposit = $user->uninvestedDeposit();
         $isWithdrawalOpen = self::isWithdrawalWindowOpen();
         $totalDeposited = $user->totalDeposited();
+        $isAccountActivated = ($totalDeposited >= 15000)
+            || ($user->totalSpentOnPlans() >= 15000)
+            || $user->userPlans()->where('status', 'active')->exists();
         $currentBogotaTime = now()->setTimezone('America/Bogota')->format('h:i A');
 
-        return view('cliente.withdrawals.index', compact('user', 'withdrawals', 'paymentMethods', 'withdrawableBalance', 'uninvestedDeposit', 'totalDeposited', 'isWithdrawalOpen', 'currentBogotaTime'));
+        return view('cliente.withdrawals.index', compact('user', 'withdrawals', 'paymentMethods', 'withdrawableBalance', 'uninvestedDeposit', 'totalDeposited', 'isAccountActivated', 'isWithdrawalOpen', 'currentBogotaTime'));
     }
 
     public function store(Request $request)
@@ -42,10 +45,14 @@ class ClientWithdrawalController extends Controller
 
         $user = Auth::user();
 
-        // Validación de seguridad: Requiere haber realizado al menos una recarga aprobada mínima de $15.000 COP
+        // Validación de seguridad: Requiere haber realizado al menos una recarga aprobada de $15.000 COP o tener un Plan VIP activo/adquirido
         $totalDeposited = $user->totalDeposited();
-        if ($totalDeposited < 15000) {
-            return back()->with('error', '⚠️ Para habilitar tu cuenta para retiros, es obligatorio haber realizado una recarga mínima de $15.000 COP. Recarga tu cuenta y activa tu membresía VIP para desbloquear tus retiros.');
+        $isAccountActivated = ($totalDeposited >= 15000)
+            || ($user->totalSpentOnPlans() >= 15000)
+            || $user->userPlans()->where('status', 'active')->exists();
+
+        if (!$isAccountActivated) {
+            return back()->with('error', '⚠️ Para habilitar tu cuenta para retiros, es obligatorio haber realizado una recarga mínima de $15.000 COP o activar un Plan VIP para desbloquear tus retiros.');
         }
 
         $withdrawable = $user->withdrawableBalance();
