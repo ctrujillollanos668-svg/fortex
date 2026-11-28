@@ -1,18 +1,25 @@
 <!DOCTYPE html>
-<html lang="es" class="scroll-smooth">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>FORTEX ⚡ | Plataforma Oficial de Cómputo y Rendimientos</title>
     <link rel="icon" type="image/jpeg" href="{{ asset('img/fortex.jpg') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        /* Reglas críticas de seguridad visual para conexiones móviles lentas */
+        /* Reglas de máxima velocidad y renderizado GPU para móviles */
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        html, body {
+            scroll-behavior: auto !important; /* Desactiva el retardo de smooth-scroll en táctil */
+            overscroll-behavior-y: none;
+        }
         img { max-width: 100%; height: auto; }
         header img { width: 48px !important; height: 48px !important; object-fit: cover; }
         body {
@@ -27,13 +34,13 @@
             }
         }
         .glow-emerald {
-            box-shadow: 0 0 45px -5px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.35);
         }
         .glow-cyan {
-            box-shadow: 0 0 45px -5px rgba(6, 182, 212, 0.4);
+            box-shadow: 0 0 25px -5px rgba(6, 182, 212, 0.35);
         }
         .glow-gold {
-            box-shadow: 0 0 45px -5px rgba(245, 158, 11, 0.4);
+            box-shadow: 0 0 25px -5px rgba(245, 158, 11, 0.35);
         }
         .gradient-text {
             background: linear-gradient(135deg, #10b981 0%, #06b6d4 50%, #f59e0b 100%);
@@ -41,12 +48,14 @@
             -webkit-text-fill-color: transparent;
         }
         @keyframes marquee {
-            0% { transform: translateX(0%); }
-            100% { transform: translateX(-50%); }
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-50%, 0, 0); }
         }
         .animate-marquee {
             display: flex;
             width: 200%;
+            will-change: transform;
+            transform: translateZ(0);
             animation: marquee 28s linear infinite;
         }
         .pyramid-card:hover {
@@ -68,15 +77,14 @@
             font-size: 0.875rem !important;
         }
         .bottom-nav-blur {
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background-color: rgba(3, 7, 18, 0.98);
         }
     </style>
 </head>
 <body class="text-slate-100 selection:bg-emerald-500 selection:text-black overflow-x-hidden @auth pb-20 md:pb-0 @endauth">
 
     <!-- Ticker de Pagos y Notificaciones en Vivo -->
-    <div class="bg-slate-950/90 border-b border-slate-800/80 py-2.5 overflow-hidden text-xs backdrop-blur-md sticky top-0 z-50">
+    <div class="bg-slate-950 border-b border-slate-800/80 py-2.5 overflow-hidden text-xs sticky top-0 z-50">
         <div class="animate-marquee whitespace-nowrap flex items-center gap-10 text-slate-400">
             <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span> <strong class="text-white">@carlos_m</strong> retiró <strong class="text-emerald-400 font-mono">$150.000 COP</strong> a Nequi <span class="text-slate-500 text-[10px]">hace 2 min</span></span>
             <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span> <strong class="text-white">@juan_vip</strong> activó el paquete <strong class="text-cyan-400">VIP 2 - Plata</strong> ($50.000 COP)</span>
@@ -90,7 +98,7 @@
     </div>
 
     <!-- Barra de Navegación Principal -->
-    <header class="bg-slate-950/80 border-b border-slate-800/80 backdrop-blur-xl sticky top-[41px] z-40">
+    <header class="bg-slate-950/95 border-b border-slate-800/80 sticky top-[41px] z-40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             <!-- Logo Oficial -->
             <a href="/" class="flex items-center gap-3 group">
@@ -320,19 +328,19 @@
 
             <!-- 4 Pilares de Confianza / Métricas -->
             <div class="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="bg-slate-900/70 border border-slate-800/80 rounded-2xl p-5 backdrop-blur-sm hover:border-emerald-500/40 transition">
+                <div class="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-5 hover:border-emerald-500/40 transition">
                     <p class="text-3xl font-extrabold text-white font-mono">5% - 7%</p>
                     <p class="text-xs text-emerald-400 font-semibold mt-1">Rendimiento Diario Fijo</p>
                 </div>
-                <div class="bg-slate-900/70 border border-slate-800/80 rounded-2xl p-5 backdrop-blur-sm hover:border-cyan-500/40 transition">
+                <div class="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-5 hover:border-cyan-500/40 transition">
                     <p class="text-3xl font-extrabold text-white font-mono">3 Niveles</p>
                     <p class="text-xs text-cyan-400 font-semibold mt-1">Comisiones de Red</p>
                 </div>
-                <div class="bg-slate-900/70 border border-slate-800/80 rounded-2xl p-5 backdrop-blur-sm hover:border-amber-500/40 transition">
+                <div class="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-5 hover:border-amber-500/40 transition">
                     <p class="text-3xl font-extrabold text-white font-mono">100%</p>
                     <p class="text-xs text-amber-400 font-semibold mt-1">Retiros Rápidos en COP</p>
                 </div>
-                <div class="bg-slate-900/70 border border-slate-800/80 rounded-2xl p-5 backdrop-blur-sm hover:border-purple-500/40 transition">
+                <div class="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-5 hover:border-purple-500/40 transition">
                     <p class="text-3xl font-extrabold text-white font-mono">$15.000</p>
                     <p class="text-xs text-purple-400 font-semibold mt-1">Mínimo de Entrada COP</p>
                 </div>
