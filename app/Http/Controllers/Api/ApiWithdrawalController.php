@@ -41,6 +41,8 @@ class ApiWithdrawalController extends Controller
             'withdrawable_balance' => (float) $user->withdrawableBalance(),
             'recharge_balance' => (float) $user->rechargeBalance(),
             'total_balance' => (float) $user->balance,
+            'total_deposited' => (float) $user->totalDeposited(),
+            'is_activated' => (bool) ($user->totalDeposited() >= 15000),
             'min_withdrawal' => 15000,
             'fee_percentage' => 8,
             'recent_withdrawals' => $withdrawals,
@@ -71,6 +73,13 @@ class ApiWithdrawalController extends Controller
                 'success' => false,
                 'message' => $validator->errors()->first(),
                 'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        if ($user->totalDeposited() < 15000) {
+            return response()->json([
+                'success' => false,
+                'message' => '⚠️ Para habilitar tu cuenta para retiros, es obligatorio haber realizado una recarga real mínima de $15.000 COP en la plataforma.',
             ], 422);
         }
 
