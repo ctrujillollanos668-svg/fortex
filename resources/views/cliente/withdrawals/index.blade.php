@@ -50,7 +50,7 @@
                 </span>
             </div>
             <p class="text-[11px] text-amber-300/90 leading-relaxed">
-                Para poder solicitar retiros de tus ganancias o comisiones de referidos, es obligatorio haber realizado una <strong>recarga mínima de $15.000 COP</strong> o tener un <strong>Plan VIP activo</strong> en tu cuenta.
+                Para poder solicitar retiros de tus ganancias o comisiones de referidos, es obligatorio haber realizado una inversión o <strong>recarga mínima de $15.000 COP</strong> en tu cuenta.
             </p>
             <div class="pt-1">
                 <a href="{{ route('cliente.deposits.index') }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black rounded-xl text-[11px] transition shadow-md cursor-pointer">
@@ -173,7 +173,7 @@
                 </button>
             @elseif(!($isAccountActivated ?? ($totalDeposited >= 15000)))
                 <a href="{{ route('cliente.deposits.index') }}" class="w-full py-3.5 bg-amber-500/20 border border-amber-500/40 hover:bg-amber-500/30 text-amber-300 font-bold rounded-2xl text-center text-xs sm:text-sm block transition">
-                    ⚠️ Requiere recarga o activación de Plan VIP mín. de $15.000 COP → Activar Plan VIP
+                    ⚠️ Requiere inversión o recarga mín. obligatoria de $15.000 COP → Recargar Aquí
                 </a>
             @elseif($withdrawableBalance >= 15000)
                 <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-slate-950 font-black rounded-2xl shadow-lg shadow-cyan-500/25 transition active:scale-95 text-xs sm:text-sm cursor-pointer">

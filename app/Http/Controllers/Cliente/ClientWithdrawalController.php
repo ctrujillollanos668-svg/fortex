@@ -29,9 +29,7 @@ class ClientWithdrawalController extends Controller
         $uninvestedDeposit = $user->uninvestedDeposit();
         $isWithdrawalOpen = self::isWithdrawalWindowOpen();
         $totalDeposited = $user->totalDeposited();
-        $isAccountActivated = ($totalDeposited >= 15000)
-            || ($user->totalSpentOnPlans() >= 15000)
-            || $user->userPlans()->where('status', 'active')->exists();
+        $isAccountActivated = ($totalDeposited >= 15000) || ($user->totalSpentOnPlans() >= 15000);
         $currentBogotaTime = now()->setTimezone('America/Bogota')->format('h:i A');
 
         return view('cliente.withdrawals.index', compact('user', 'withdrawals', 'paymentMethods', 'withdrawableBalance', 'uninvestedDeposit', 'totalDeposited', 'isAccountActivated', 'isWithdrawalOpen', 'currentBogotaTime'));
@@ -45,14 +43,12 @@ class ClientWithdrawalController extends Controller
 
         $user = Auth::user();
 
-        // Validación de seguridad: Requiere haber realizado al menos una recarga aprobada de $15.000 COP o tener un Plan VIP activo/adquirido
+        // Validación de seguridad estricta: Requiere haber invertido o recargado OBLIGATORIAMENTE mínimo $15.000 COP
         $totalDeposited = $user->totalDeposited();
-        $isAccountActivated = ($totalDeposited >= 15000)
-            || ($user->totalSpentOnPlans() >= 15000)
-            || $user->userPlans()->where('status', 'active')->exists();
+        $isAccountActivated = ($totalDeposited >= 15000) || ($user->totalSpentOnPlans() >= 15000);
 
         if (!$isAccountActivated) {
-            return back()->with('error', '⚠️ Para habilitar tu cuenta para retiros, es obligatorio haber realizado una recarga mínima de $15.000 COP o activar un Plan VIP para desbloquear tus retiros.');
+            return back()->with('error', '⚠️ Para habilitar tu cuenta para retiros, es obligatorio haber realizado una inversión o recarga mínima de $15.000 COP.');
         }
 
         $withdrawable = $user->withdrawableBalance();
