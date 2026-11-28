@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 // Rutas Públicas (Sin Token)
 Route::post('/auth/login', [ApiAuthController::class, 'login']);
 Route::post('/auth/register', [ApiAuthController::class, 'register']);
+Route::get('/plans', [ApiPlanController::class, 'catalog']);
 
 // Rutas Protegidas (Requieren Bearer Token)
 Route::middleware(['api.auth'])->group(function () {
@@ -18,7 +19,6 @@ Route::middleware(['api.auth'])->group(function () {
     Route::get('/user/profile', [ApiAuthController::class, 'profile']);
 
     // Planes VIP (Catálogo y Mis Planes)
-    Route::get('/plans', [ApiPlanController::class, 'catalog']);
     Route::get('/user/plans', [ApiPlanController::class, 'myPlans']);
     Route::post('/user/plans/buy', [ApiPlanController::class, 'buy']);
     Route::post('/user/plans/claim/{id}', [ApiPlanController::class, 'claimDaily']);

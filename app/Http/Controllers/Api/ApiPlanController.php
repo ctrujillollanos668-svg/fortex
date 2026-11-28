@@ -45,9 +45,9 @@ class ApiPlanController extends Controller
 
         return response()->json([
             'success' => true,
-            'balance' => (float) $user->balance,
-            'recharge_balance' => (float) $user->rechargeBalance(),
-            'earnings_balance' => (float) $user->earningsBalance(),
+            'balance' => (float) ($user?->balance ?? 0.0),
+            'recharge_balance' => (float) ($user ? $user->rechargeBalance() : 0.0),
+            'earnings_balance' => (float) ($user ? $user->earningsBalance() : 0.0),
             'plans' => $formatted,
         ]);
     }
